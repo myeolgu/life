@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { finance, progress, tips } from "./data";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import { finance, progress, tips, events as eventsSeed } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
 import { useContentItems } from "../../hooks/useContentItems";
+import { useCalendarEvents } from "../../hooks/useCalendarEvents";
+import EventStatusBadge, { getEventStatus } from "../../components/EventStatusBadge";
 import ErrorBoundary from "../../components/ErrorBoundary";
 import Modal from "../../components/Modal";
 
@@ -17,6 +22,64 @@ const TIP_TYPE_CLASS = {
   유튜브: "type-youtube",
   정보: "type-info",
 };
+
+function formatDate(iso) {
+  return iso.replaceAll("-", ".");
+}
+
+function formatRange(ev) {
+  if (!ev.end) return formatDate(ev.start);
+  const end = new Date(`${ev.end}T00:00:00`);
+  end.setDate(end.getDate() - 1);
+  const endIso = end.toISOString().slice(0, 10);
+  return endIso === ev.start ? formatDate(ev.start) : `${formatDate(ev.start)} ~ ${formatDate(endIso)}`;
+}
+
+function LoanCalendar() {
+  const { events } = useCalendarEvents("loan", eventsSeed);
+  const [selectedId, setSelectedId] = useState(null);
+  const selected = events.find((e) => e.id === selectedId);
+
+  return (
+    <>
+      <div className="calendar-wrap">
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          initialDate="2026-09-01"
+          locale="ko"
+          height="auto"
+          headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+          events={events}
+          eventClick={(info) => setSelectedId(info.event.id)}
+          eventContent={(arg) => {
+            // 이벤트를 배열에서 다시 찾지 않고 FullCalendar가 들고 있는 값을 바로 쓴다 —
+            // 배열 룩업이 어긋나면 크래시 나는 걸 홈 캘린더에서 겪어서(2026-09-06) 여기도 같은 방식으로.
+            const status = getEventStatus({ start: arg.event.startStr, end: arg.event.endStr || undefined });
+            return (
+              <div className={`cal-event status-${status}`}>
+                <EventStatusBadge status={status} />
+                <span className="cal-event-title">{arg.event.title}</span>
+              </div>
+            );
+          }}
+        />
+      </div>
+      <Modal open={!!selected} onClose={() => setSelectedId(null)}>
+        {selected && (
+          <div className="event-detail">
+            <div className="event-detail-top">
+              <EventStatusBadge status={getEventStatus(selected)} />
+              <span className="event-detail-date">{formatRange(selected)}</span>
+            </div>
+            <h3>{selected.title}</h3>
+            <p>{selected.description}</p>
+          </div>
+        )}
+      </Modal>
+    </>
+  );
+}
 
 function Progress() {
   const { items, toggle, persistent } = useChecklist("loan_progress", progress);
@@ -38,6 +101,10 @@ function Progress() {
           </li>
         ))}
       </ul>
+
+      <h3>일정 캘린더</h3>
+      <p className="muted">날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.</p>
+      <LoanCalendar />
     </section>
   );
 }
@@ -75,6 +142,10 @@ function Finance() {
           ))}
         </tbody>
       </table>
+
+      <h3>일정 캘린더</h3>
+      <p className="muted">날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.</p>
+      <LoanCalendar />
 
       <h3>2026년 신혼부부 디딤돌대출 요약</h3>
       <p className="muted">검증 필요 — 정책 변동 가능성 있음. 신청 전 최신 정보 재확인.</p>
