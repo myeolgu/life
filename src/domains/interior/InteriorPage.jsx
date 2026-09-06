@@ -49,8 +49,8 @@ function PropertyInfo() {
           <tr><th>아파트명</th><td>{property.name}</td></tr>
           <tr><th>주소</th><td>{property.address}</td></tr>
           <tr><th>동/호수</th><td>{property.unit}</td></tr>
-          <tr><th>매매 성공일</th><td>{property.dealDate}</td></tr>
           <tr><th>상태</th><td>{property.status}</td></tr>
+          <tr><th>잔금(입주)일</th><td>{property.closingDate}</td></tr>
           <tr><th>준공연도</th><td>{property.built}</td></tr>
           <tr><th>단지 규모</th><td>{property.complex}</td></tr>
           <tr><th>평형</th><td>{property.pyeong}</td></tr>
@@ -104,13 +104,13 @@ function Timeline() {
     <section>
       <h2>공사 진행 순서</h2>
       <p className="muted">
-        착공 예정일 2026.09.20 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다. 날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.
+        잔금(입주)일 2026.12.10 이후, 착공 예정일 2026.12.12 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다. 날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.
       </p>
       <div className="calendar-wrap">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
-          initialDate="2026-09-20"
+          initialDate="2026-12-12"
           locale="ko"
           height="auto"
           headerToolbar={{ left: "prev,next today", center: "title", right: "" }}

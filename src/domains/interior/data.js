@@ -2,8 +2,8 @@ export const property = {
   name: "부개주공1단지",
   address: "인천광역시 부평구 부개동",
   unit: "107동 1001호",
-  dealDate: "2025-12-10",
-  status: "매매 완료",
+  status: "매매 계약 완료 · 잔금 대기",
+  closingDate: "2026-12-10",
   built: "1996년 11월",
   complex: "11개동, 1,044세대, 13~20층",
   pyeong: "25평 (전용 약 59㎡)",
@@ -29,21 +29,21 @@ export const scope = [
   { no: 12, item: "공통", detail: "기존 자재 철거비, 폐기물 처리비, 기본 마감 및 보수비 포함" },
 ];
 
-// 착공 예정일: 2026.09.20 (가정 — 실제 착공일이 다르면 이 배열을 다시 계산해서 갱신할 것)
-// FullCalendar 규칙: end는 "포함하지 않는" 다음날짜다 (예: 09.21~09.22 이틀짜리 작업이면 end는 09.23).
+// 착공 예정일: 2026.12.12 (잔금일 2026.12.10 이후 — 사용자 확정, 2026-09-06)
+// FullCalendar 규칙: end는 "포함하지 않는" 다음날짜다 (예: 12.13~12.14 이틀짜리 작업이면 end는 12.15).
 export const events = [
-  { id: "d1", title: "철거", start: "2026-09-20", description: "욕실 철거, 현관/베란다 타일 철거, 기존 문·몰딩 철거, 폐기물 반출" },
-  { id: "d2-3", title: "욕실 방수", start: "2026-09-21", end: "2026-09-23", description: "욕실 방수 (1차·2차) 및 양생" },
-  { id: "d4-5", title: "타일 시공", start: "2026-09-23", end: "2026-09-25", description: "욕실 벽/바닥, 베란다, 현관 타일 시공" },
-  { id: "d6", title: "목공", start: "2026-09-25", description: "천장 몰딩, 문틀 보수, 걸레받이 밑작업" },
-  { id: "d7", title: "전기 (콘센트 증설)", start: "2026-09-26", description: "콘센트 증설(3~4개) 및 배선 정리" },
-  { id: "d8", title: "문 설치", start: "2026-09-27", description: "방문 3개, 욕실문 1개 설치" },
-  { id: "d9", title: "필름 시공", start: "2026-09-28", description: "싱크대 하부장 필름, 현관문 안쪽 필름 시공" },
-  { id: "d10-12", title: "도배", start: "2026-09-29", end: "2026-10-02", description: "벽 + 천장 전체(LX 베스띠 실크벽지), 건조 양생" },
-  { id: "d13-14", title: "장판 시공", start: "2026-10-02", end: "2026-10-04", description: "장판 시공 (3.0T)" },
-  { id: "d15", title: "걸레받이 마감", start: "2026-10-04", description: "걸레받이 최종 마감 설치" },
-  { id: "d16", title: "욕실 마감", start: "2026-10-05", description: "변기, 세면대, 수전, 환풍기, 조명 설치 / 싱크대 상판 교체" },
-  { id: "d17-18", title: "최종 점검·입주청소", start: "2026-10-06", end: "2026-10-08", description: "최종 점검, 하자보수 체크, 입주 청소" },
+  { id: "d1", title: "철거", start: "2026-12-12", description: "욕실 철거, 현관/베란다 타일 철거, 기존 문·몰딩 철거, 폐기물 반출" },
+  { id: "d2-3", title: "욕실 방수", start: "2026-12-13", end: "2026-12-15", description: "욕실 방수 (1차·2차) 및 양생" },
+  { id: "d4-5", title: "타일 시공", start: "2026-12-15", end: "2026-12-17", description: "욕실 벽/바닥, 베란다, 현관 타일 시공" },
+  { id: "d6", title: "목공", start: "2026-12-17", description: "천장 몰딩, 문틀 보수, 걸레받이 밑작업" },
+  { id: "d7", title: "전기 (콘센트 증설)", start: "2026-12-18", description: "콘센트 증설(3~4개) 및 배선 정리" },
+  { id: "d8", title: "문 설치", start: "2026-12-19", description: "방문 3개, 욕실문 1개 설치" },
+  { id: "d9", title: "필름 시공", start: "2026-12-20", description: "싱크대 하부장 필름, 현관문 안쪽 필름 시공" },
+  { id: "d10-12", title: "도배", start: "2026-12-21", end: "2026-12-24", description: "벽 + 천장 전체(LX 베스띠 실크벽지), 건조 양생" },
+  { id: "d13-14", title: "장판 시공", start: "2026-12-24", end: "2026-12-26", description: "장판 시공 (3.0T)" },
+  { id: "d15", title: "걸레받이 마감", start: "2026-12-26", description: "걸레받이 최종 마감 설치" },
+  { id: "d16", title: "욕실 마감", start: "2026-12-27", description: "변기, 세면대, 수전, 환풍기, 조명 설치 / 싱크대 상판 교체" },
+  { id: "d17-18", title: "최종 점검·입주청소", start: "2026-12-28", end: "2026-12-30", description: "최종 점검, 하자보수 체크, 입주 청소" },
 ];
 
 export const contractChecklist = [
@@ -82,10 +82,11 @@ export const contractChecklist = [
 ];
 
 export const progress = [
-  { id: "interior:deal-done", done: true, label: "아파트 매매 완료 (2025-12-10)" },
+  { id: "interior:deal-done", done: true, label: "매매 계약 체결" },
+  { id: "interior:balance-payment", done: false, label: "잔금 납부 및 입주 (예정: 2026.12.10)" },
   { id: "interior:site-survey", done: false, label: "현장 실측 / 정확한 평면도 확보" },
   { id: "interior:contractor-selected", done: false, label: "시공업체 선정 및 견적 비교 (계약/견적 체크리스트 확인)" },
-  { id: "interior:start-date-fixed", done: false, label: "착공일 확정 (예정: 2026.09.20)" },
+  { id: "interior:start-date-fixed", done: true, label: "착공일 확정 (2026.12.12)" },
   { id: "interior:construction", done: false, label: "공사 진행" },
   { id: "interior:move-in-clean", done: false, label: "입주 청소 및 최종 점검" },
 ];
