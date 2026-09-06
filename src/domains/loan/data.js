@@ -23,6 +23,17 @@ export const finance = {
   ],
 };
 
+export const events = [
+  { id: "marriage-filed", title: "혼인신고 접수", start: "2026-09-01", description: "서초구청에 혼인신고 접수" },
+  {
+    id: "cert-expected",
+    title: "혼인관계증명서 발급 예상",
+    start: "2026-09-11",
+    end: "2026-09-16",
+    description: "접수 후 10~14일 소요 예상. 발급되면 신혼부부 디딤돌대출 신청을 진행한다.",
+  },
+];
+
 export const progress = [
   { id: "loan:marriage-filed", done: true, label: "혼인신고 접수 (2026-09-01, 서초구청)" },
   { id: "loan:marriage-cert-issued", done: false, label: "혼인관계증명서 발급 (예상 2026-09-11~15)" },

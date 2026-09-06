@@ -1,3 +1,5 @@
+import HomeCalendar from "./components/HomeCalendar";
+
 const CATEGORIES = [
   {
     key: "interior",
@@ -27,6 +29,8 @@ export default function Home({ onSelect }) {
           </button>
         ))}
       </div>
+
+      <HomeCalendar onNavigate={onSelect} />
     </div>
   );
 }

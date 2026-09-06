@@ -16,7 +16,9 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 
 ## 이 저장소의 구조
 - `src/App.jsx` — 최상위 라우터. `view` 상태(`home`/`interior`/`loan`/...)로 홈 화면과 각 도메인 페이지를 전환한다. 새 도메인을 추가하면 여기에 분기를 추가.
-- `src/Home.jsx` — 홈 화면. 카테고리 카드(인테리어, 대출...)를 눌러 도메인으로 진입.
+- `src/Home.jsx` — 홈 화면. 카테고리 카드(인테리어, 대출...)를 눌러 도메인으로 진입하고, 하단에 `HomeCalendar`로 전체 도메인 일정을 모아 보여준다.
+- `src/allEvents.js` — 각 도메인의 `events` 배열을 모아 홈 캘린더에서 쓰는 통합 목록. 새 도메인에 날짜 있는 일정이 생기면 여기 `domainMeta`에 색상/이름을 등록하고 `allEvents`에 합쳐준다.
+- `src/components/` — 도메인에 종속되지 않는 공용 컴포넌트. `EventStatusBadge`(종료/진행중/예정 배지, 오늘 날짜 기준 자동 계산), `HomeCalendar`(홈 화면 통합 캘린더), `ErrorBoundary`(탭/섹션 단위 에러 격리 — 하나가 깨져도 앱 전체가 하얗게 안 되게 함. 새 탭/섹션을 추가할 때는 항상 이걸로 감싼다).
 - `src/domains/<도메인>/` — 도메인별 폴더. 각 도메인은 `data.js`(콘텐츠/체크리스트 시드 데이터)와 `<Domain>Page.jsx`(그 도메인 안의 탭/섹션 UI)로 구성된다.
   - `src/domains/interior/` — 인테리어 도메인 (매물정보/시공범위/공사순서(캘린더)/계약체크리스트/진행상황)
   - `src/domains/loan/` — 대출/혼인신고 도메인 (자금계획/진행상황)
@@ -27,7 +29,7 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 - `public/robots.txt` — 전체 크롤링 차단 (`Disallow: /`).
 - `.github/workflows/deploy.yml` — main 브랜치 push 시 GitHub Pages 자동 배포 (Supabase 환경변수를 빌드 시 주입).
 - `vite.config.js` — `base: '/life/'` (GitHub Pages 저장소 경로와 일치, 저장소명이 바뀌면 같이 수정) + `VitePWA` 플러그인 설정(매니페스트, 아이콘, 서비스워커).
-- `src/assets/icon-source.svg` — 앱 아이콘 원본. `public/icons/`의 PNG들은 이걸 래스터화해서 만든 결과물이라, 아이콘을 바꾸려면 이 SVG를 고치고 다시 PNG로 렌더링(192/512/마스커블 512)해야 한다.
+- `src/assets/icon-source.svg` — 앱 아이콘 원본 (16x16 그리드 픽셀아트 집 모양, `shape-rendering="crispEdges"`). `public/favicon.svg`와 `public/icons/`의 PNG(192/512/마스커블 512)는 전부 이 파일에서 만든 결과물이라, 아이콘을 바꾸려면 이 SVG를 고치고 다시 렌더링해야 한다 (PNG는 `sharp`로 `kernel: 'nearest'` 리사이즈해야 픽셀 경계가 흐려지지 않는다 — 작업 끝나면 `sharp`는 다시 제거). 사이트 컨셉이 "살짝 픽셀아트 느낌"이라 이 아이콘의 16그리드/저채도 팔레트 톤을 다른 UI 요소(뱃지, 카드 등)에도 참고할 것.
 - `.claude/agents/interior-design-assistant.md` — 인테리어 도메인 전담 서브에이전트. 다른 도메인(예산, 계약 검토 등)이 구체화되면 같은 방식으로 도메인별 에이전트를 추가한다.
 - `.claude/skills/interior-notion-project/SKILL.md` — (완전 레거시) 예전에 Notion으로 관리하던 시절의 페이지 구조 기록. Notion은 더 이상 사용하지 않으며, 과거 정리 내용을 참고만 할 때 남겨둠.
 
