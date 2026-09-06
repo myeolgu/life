@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { property, scope, timeline, contractChecklist, progress } from "./data";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import { property, scope, events, contractChecklist, progress } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
 
 const TABS = [
@@ -78,26 +81,47 @@ function Scope() {
   );
 }
 
+function formatDate(iso) {
+  return iso.replaceAll("-", ".");
+}
+
+function formatRange(ev) {
+  if (!ev.end) return formatDate(ev.start);
+  const end = new Date(`${ev.end}T00:00:00`);
+  end.setDate(end.getDate() - 1);
+  const endIso = end.toISOString().slice(0, 10);
+  return endIso === ev.start ? formatDate(ev.start) : `${formatDate(ev.start)} ~ ${formatDate(endIso)}`;
+}
+
 function Timeline() {
+  const [selectedId, setSelectedId] = useState(events[0].id);
+  const selected = events.find((e) => e.id === selectedId);
+
   return (
     <section>
       <h2>공사 진행 순서</h2>
       <p className="muted">
-        착공 예정일 2026.09.20 기준으로 정리했습니다. 실제 착공일이 달라지면 날짜를 다시 계산해서 갱신합니다.
+        착공 예정일 2026.09.20 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다. 날짜(일정)를 클릭하면 아래에 상세 내용이 나옵니다.
       </p>
-      <table className="data-table">
-        <thead>
-          <tr><th>날짜</th><th>작업</th></tr>
-        </thead>
-        <tbody>
-          {timeline.map((t, i) => (
-            <tr key={i}>
-              <td className="nowrap">{t.day}</td>
-              <td>{t.task}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="calendar-wrap">
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          initialDate="2026-09-20"
+          locale="ko"
+          height="auto"
+          headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+          events={events}
+          eventClick={(info) => setSelectedId(info.event.id)}
+        />
+      </div>
+      {selected && (
+        <div className="event-detail">
+          <div className="event-detail-date">{formatRange(selected)}</div>
+          <h3>{selected.title}</h3>
+          <p>{selected.description}</p>
+        </div>
+      )}
       <ul className="notes">
         <li>총 소요기간: 약 18일 작업일 기준 (주말·양생 여유 포함 시 실질 3~4주)</li>
         <li>방수 양생 기간과 도배 건조 기간이 전체 일정의 변수 — 여유 있게 잡을 것</li>

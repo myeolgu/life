@@ -18,7 +18,7 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 - `src/App.jsx` — 최상위 라우터. `view` 상태(`home`/`interior`/`loan`/...)로 홈 화면과 각 도메인 페이지를 전환한다. 새 도메인을 추가하면 여기에 분기를 추가.
 - `src/Home.jsx` — 홈 화면. 카테고리 카드(인테리어, 대출...)를 눌러 도메인으로 진입.
 - `src/domains/<도메인>/` — 도메인별 폴더. 각 도메인은 `data.js`(콘텐츠/체크리스트 시드 데이터)와 `<Domain>Page.jsx`(그 도메인 안의 탭/섹션 UI)로 구성된다.
-  - `src/domains/interior/` — 인테리어 도메인 (매물정보/시공범위/공사순서/계약체크리스트/진행상황)
+  - `src/domains/interior/` — 인테리어 도메인 (매물정보/시공범위/공사순서(캘린더)/계약체크리스트/진행상황)
   - `src/domains/loan/` — 대출/혼인신고 도메인 (자금계획/진행상황)
   - 새 도메인을 추가할 때는 이 패턴을 그대로 따라 `src/domains/<새도메인>/` 폴더를 만들고, `Home.jsx`의 카테고리 목록과 `App.jsx`의 라우팅에 추가한다.
 - `src/hooks/useChecklist.js` — 체크박스 목록을 Supabase `checklist_items` 테이블과 동기화하는 공용 훅. 모든 도메인이 이걸 재사용한다 (도메인마다 다른 `domain` 문자열 키로 구분: `interior_progress`, `loan_progress`, `loan_documents` 등).
@@ -52,6 +52,16 @@ create policy "anon update" on checklist_items for update to anon, authenticated
 create policy "anon delete" on checklist_items for delete to anon, authenticated using (true);
 ```
 `to anon, authenticated`를 꼭 명시할 것 — 역할을 안 적으면(기본 PUBLIC) 실제로는 insert가 RLS에 막히는 걸 2026-09-06에 겪었다. 사용자가 로그인 없이 anon key로만 접근하는 개인용 사이트라서 RLS를 전체 허용으로 열어둔 것 — 인증을 붙이기 전까지는 유지한다. 앱이 처음 로드될 때 `useChecklist`가 각 도메인의 시드 데이터를 자동으로 upsert하므로, 테이블만 만들어두면 항목은 앱이 채운다.
+
+## 일정/캘린더 데이터
+날짜가 있는 진행 일정(공사 순서 등)은 표가 아니라 `@fullcalendar/react`(dayGrid + interaction 플러그인)로 실제 달력 뷰로 보여준다. 날짜를 클릭하면 해당 일정의 상세 설명이 아래 패널에 나온다 (`InteriorPage.jsx`의 `Timeline` 컴포넌트 참고).
+
+이벤트 데이터 형식 (`src/domains/<도메인>/data.js`의 `events` 배열):
+```js
+{ id: "d1", title: "철거", start: "2026-09-20", end: "2026-09-23", description: "욕실 철거, 폐기물 반출 등 상세 내용" }
+```
+- `end`는 FullCalendar 규칙대로 "포함하지 않는" 다음 날짜다. 하루짜리 일정이면 `end`를 아예 생략한다.
+- `title`은 달력 칸에 들어갈 짧은 이름, `description`은 클릭했을 때 보여줄 전체 설명 — 체크리스트와 마찬가지로 이것도 결국 구조화된 데이터이며, 지금은 `data.js`에 정적으로 있지만 사용자가 직접 일정을 추가/수정하게 만들 때는 `checklist_items`와 같은 방식으로 Supabase 테이블(`calendar_events` 등)로 옮기고 `useChecklist`처럼 훅으로 감싼다.
 
 ## Supabase 스키마 변경 자동화 — Management API
 스키마(테이블/정책 등)를 바꿔야 할 때, 매번 사용자에게 SQL Editor에서 직접 실행해달라고 부탁할 필요 없다. `.env`(gitignore 처리, 커밋 안 됨)에 `SUPABASE_PROJECT_REF`와 `SUPABASE_MANAGEMENT_TOKEN`이 들어있으면, 아래처럼 Management API로 Claude가 직접 SQL을 실행할 수 있다:
