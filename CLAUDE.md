@@ -19,3 +19,4 @@ Notion 허브 페이지(https://app.notion.com/p/3d3face0214c80c7975fd90da710038
 - 대출/정책 관련 정보(디딤돌대출 조건 등)는 시점에 따라 바뀌므로, 참고할 때마다 최신 여부를 재검색해서 확인한다.
 - 폰트는 Pretendard로 전역 통일 (`index.html`의 CDN 링크 + `src/index.css`의 font-family).
 - 이 사이트는 검색 노출을 원치 않는 개인 프로젝트이므로 noindex/robots.txt 설정을 절대 제거하지 않는다.
+- git add/commit은 사용자에게 매번 확인받지 않고 바로 진행한다 (사용자가 명시적으로 요청함, 2026-09-06). 단, force push나 히스토리를 되돌리는 명령(reset --hard, 강제 push 등)처럼 되돌리기 어려운 작업은 예외로 하고 여전히 확인을 구한다.
