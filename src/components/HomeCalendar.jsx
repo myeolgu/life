@@ -5,6 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { allEvents, domainMeta } from "../allEvents";
 import EventStatusBadge, { getEventStatus } from "./EventStatusBadge";
 import ErrorBoundary from "./ErrorBoundary";
+import Modal from "./Modal";
 
 function formatDate(iso) {
   return iso.replaceAll("-", ".");
@@ -25,7 +26,7 @@ function HomeCalendarInner({ onNavigate }) {
   return (
     <section className="home-calendar">
       <h2>전체 일정</h2>
-      <p className="muted">모든 카테고리의 일정을 한눈에 봅니다. 날짜를 클릭하면 상세 내용이 나옵니다.</p>
+      <p className="muted">모든 카테고리의 일정을 한눈에 봅니다. 날짜를 클릭하면 상세 내용이 팝업으로 나옵니다.</p>
       <div className="calendar-legend">
         {Object.entries(domainMeta).map(([key, meta]) => (
           <span key={key} className="legend-item">
@@ -55,23 +56,25 @@ function HomeCalendarInner({ onNavigate }) {
           }}
         />
       </div>
-      {selected && (
-        <div className="event-detail">
-          <div className="event-detail-top">
-            <span className="legend-dot" style={{ background: domainMeta[selected.domain].color }} />
-            <span className="event-detail-domain">{domainMeta[selected.domain].label}</span>
-            <EventStatusBadge status={getEventStatus(selected)} />
-            <span className="event-detail-date">{formatRange(selected)}</span>
+      <Modal open={!!selected} onClose={() => setSelectedId(null)}>
+        {selected && (
+          <div className="event-detail">
+            <div className="event-detail-top">
+              <span className="legend-dot" style={{ background: domainMeta[selected.domain].color }} />
+              <span className="event-detail-domain">{domainMeta[selected.domain].label}</span>
+              <EventStatusBadge status={getEventStatus(selected)} />
+              <span className="event-detail-date">{formatRange(selected)}</span>
+            </div>
+            <h3>{selected.title}</h3>
+            <p>{selected.description}</p>
+            {onNavigate && (
+              <button className="event-detail-link" onClick={() => onNavigate(selected.domain)}>
+                {domainMeta[selected.domain].label} 바로가기 →
+              </button>
+            )}
           </div>
-          <h3>{selected.title}</h3>
-          <p>{selected.description}</p>
-          {onNavigate && (
-            <button className="event-detail-link" onClick={() => onNavigate(selected.domain)}>
-              {domainMeta[selected.domain].label} 바로가기 →
-            </button>
-          )}
-        </div>
-      )}
+        )}
+      </Modal>
     </section>
   );
 }
