@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   property as propertySeed,
   scope as scopeSeed,
@@ -174,24 +177,68 @@ function Timeline() {
   );
 }
 
-const APARTMENT_ADDRESS = "부개주공1단지 인천광역시 부평구 부개동";
+// 2026-09-06 기준 OpenStreetMap(Nominatim) 도로명주소 기준 지오코딩 좌표 — 건물 정확 위치가 아니라
+// 도로 단위 근사치다 (한국 건물 단위 주소는 OSM 커버리지가 낮음). "직관적 거리 비교" 목적으로는 충분.
+const APARTMENT_LOCATION = { lat: 37.5041112, lng: 126.7329245, label: "부개주공1단지 (길주남로 143 기준)" };
+const CONTRACTOR_LOCATIONS = {
+  1: { lat: 37.5197106, lng: 126.7313432 },
+  2: { lat: 37.5042615, lng: 126.7128978 },
+  3: { lat: 37.5080178, lng: 126.7275339 },
+  4: { lat: 37.5003385, lng: 126.7372825 },
+};
 
-function stripDongSuffix(address) {
-  return address.replace(/\s*\([^)]*\)\s*$/, "");
+function createPinIcon({ text, bg, size }) {
+  return L.divIcon({
+    className: "pin-icon",
+    html: `<div class="pin-dot" style="width:${size}px;height:${size}px;background:${bg};">${text}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
 }
 
-function buildContractorsMapUrl(contractors) {
-  const origin = encodeURIComponent(APARTMENT_ADDRESS);
-  const stops = contractors
-    .filter((c) => c.address && c.address !== "확인 안 됨")
-    .map((c) => encodeURIComponent(stripDongSuffix(c.address)));
-  if (stops.length === 0) return null;
-  return `https://maps.google.com/maps?saddr=${origin}&daddr=${stops.join("+to:")}`;
+const apartmentIcon = createPinIcon({ text: "★", bg: "#b4784a", size: 26 });
+const contractorIcon = (no) => createPinIcon({ text: String(no), bg: "#5b3a24", size: 22 });
+
+function FitToMarkers({ points }) {
+  const map = useMap();
+  useEffect(() => {
+    if (points.length > 0) {
+      map.fitBounds(points, { padding: [24, 24], maxZoom: 15 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map]);
+  return null;
+}
+
+function ContractorsMap({ contractors }) {
+  const markers = contractors
+    .filter((c) => CONTRACTOR_LOCATIONS[c.no])
+    .map((c) => ({ ...c, ...CONTRACTOR_LOCATIONS[c.no] }));
+  const points = [[APARTMENT_LOCATION.lat, APARTMENT_LOCATION.lng], ...markers.map((m) => [m.lat, m.lng])];
+
+  return (
+    <div className="map-embed">
+      <MapContainer center={points[0]} zoom={13} scrollWheelZoom={false} style={{ width: "100%", height: "100%" }}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <FitToMarkers points={points} />
+        <Marker position={[APARTMENT_LOCATION.lat, APARTMENT_LOCATION.lng]} icon={apartmentIcon}>
+          <Popup>{APARTMENT_LOCATION.label}</Popup>
+        </Marker>
+        {markers.map((m) => (
+          <Marker key={m.no} position={[m.lat, m.lng]} icon={contractorIcon(m.no)}>
+            <Popup>{m.no}. {m.name}<br />{m.address}</Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
+  );
 }
 
 function Contractors() {
   const { items: contractors } = useContentItems("interior", "contractors", contractorsSeed);
-  const mapUrl = buildContractorsMapUrl(contractors);
 
   return (
     <section>
@@ -223,23 +270,9 @@ function Contractors() {
         ))}
       </div>
 
-      {mapUrl && (
-        <>
-          <h3>위치 비교 (부개주공1단지 → 업체 4곳 경로)</h3>
-          <p className="muted">부개주공1단지에서 각 업체까지 경로와 거리를 한 지도에서 볼 수 있습니다.</p>
-          <div className="map-embed">
-            <iframe
-              title="시공업체 위치 지도"
-              src={`${mapUrl}&output=embed`}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-          <a className="event-detail-link" href={mapUrl} target="_blank" rel="noreferrer">
-            구글맵 새 창에서 크게 보기 →
-          </a>
-        </>
-      )}
+      <h3>위치 비교 (★ 부개주공1단지 · 1~4 업체)</h3>
+      <p className="muted">지도 위 숫자 핀이 각 업체 위치입니다. 위 카드 번호와 동일합니다.</p>
+      <ContractorsMap contractors={contractors} />
 
       <p className="callout">
         상담 전에 계약/견적 체크리스트 탭의 "업체 말장난 TOP5"를 다시 한 번 확인할 것.
