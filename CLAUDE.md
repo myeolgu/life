@@ -1,22 +1,63 @@
-# 인테리어 프로젝트
+# life — 개인 삶 통합 관리 사이트
 
-부개주공1단지 아파트 107동 1001호(인천광역시 부평구 부개동, 25평/전용 약 59㎡) 인테리어를 준비하는 개인 프로젝트입니다. 2026-09-06부터 이 저장소 자체가 React 웹앱(Vite)이며, 관리 콘텐츠(매물정보/시공범위/공사순서/자금계획/계약견적 체크리스트/진행상황)의 기준(source of truth)입니다. GitHub 저장소 `myeolgu/life`에 연결되어 있고 GitHub Pages로 배포됩니다.
+React(Vite) + Supabase 기반의 개인용 라이프 관리 웹앱입니다. GitHub 저장소 `myeolgu/life`에 연결되어 있고 GitHub Pages로 배포됩니다. 검색엔진에는 노출하지 않는 비공개 성격의 개인 사이트입니다.
 
-Notion 허브 페이지(https://app.notion.com/p/3d3face0214c80c7975fd90da7100383)는 이전 단계에서 쓰던 것으로 더 이상 기준 문서가 아닙니다 — 참고용으로만 남아있고, 새 내용은 이 React 앱(`src/data.js`)에 반영합니다.
+관리 대상은 인테리어 하나로 한정되지 않고, 삶 전반의 여러 도메인을 다룹니다. 현재 도메인:
+- **인테리어** — 부개주공1단지 아파트 107동 1001호(인천광역시 부평구 부개동, 25평/전용 약 59㎡) 인테리어 준비 (매물정보/시공범위/공사순서/계약견적 체크리스트)
+- **디딤돌 대출/계약** — 혼인신고, 신혼부부 디딤돌대출 신청 진행 상황과 자금 계획
+- **예산 관리** — 지출/예산 추적 (구축 예정)
+
+새 도메인(재정, 건강, 일정 등)이 추가될 수 있으므로, 구조를 짤 때 특정 도메인에 종속되지 않게 일반화해서 만든다.
+
+## 데이터 저장 — Supabase
+체크박스(진행상황, 체크리스트)나 편집 가능한 콘텐츠는 로컬 상태가 아니라 Supabase DB에 저장해서, 체크/수정한 내용이 그대로 남도록 한다. 클라이언트 코드는 `src/lib/supabaseClient.js`에서 환경변수(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)로 초기화한다. 이 값들은 `.env`(gitignore 처리, 로컬 개발용)와 GitHub Actions 저장소 시크릿(배포 빌드용)에 있고 절대 코드에 하드코딩하거나 커밋하지 않는다.
+
+Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL을 기록해두고, 이 파일이나 관련 skill 문서에 반영한다 (Claude는 Supabase 대시보드에 직접 접근할 수 없으므로, 스키마 변경은 사용자가 SQL 에디터에서 실행해야 함).
 
 ## 이 저장소의 구조
-- `src/data.js` — 모든 콘텐츠 데이터(매물정보, 시공범위, 공사순서, 자금계획, 계약체크리스트, 진행상황). 내용 업데이트는 여기를 수정.
-- `src/App.jsx` — 탭 기반 대시보드 UI. 새 섹션 추가 시 TABS 배열과 컴포넌트를 함께 추가.
+- `src/App.jsx` — 최상위 라우터. `view` 상태(`home`/`interior`/`loan`/...)로 홈 화면과 각 도메인 페이지를 전환한다. 새 도메인을 추가하면 여기에 분기를 추가.
+- `src/Home.jsx` — 홈 화면. 카테고리 카드(인테리어, 대출...)를 눌러 도메인으로 진입.
+- `src/domains/<도메인>/` — 도메인별 폴더. 각 도메인은 `data.js`(콘텐츠/체크리스트 시드 데이터)와 `<Domain>Page.jsx`(그 도메인 안의 탭/섹션 UI)로 구성된다.
+  - `src/domains/interior/` — 인테리어 도메인 (매물정보/시공범위/공사순서/계약체크리스트/진행상황)
+  - `src/domains/loan/` — 대출/혼인신고 도메인 (자금계획/진행상황)
+  - 새 도메인을 추가할 때는 이 패턴을 그대로 따라 `src/domains/<새도메인>/` 폴더를 만들고, `Home.jsx`의 카테고리 목록과 `App.jsx`의 라우팅에 추가한다.
+- `src/hooks/useChecklist.js` — 체크박스 목록을 Supabase `checklist_items` 테이블과 동기화하는 공용 훅. 모든 도메인이 이걸 재사용한다 (도메인마다 다른 `domain` 문자열 키로 구분: `interior_progress`, `loan_progress`, `loan_documents` 등).
+- `src/lib/supabaseClient.js` — Supabase 클라이언트 초기화.
 - `index.html` — `<meta name="robots" content="noindex, nofollow">`로 검색엔진 노출 차단, Pretendard 폰트 CDN 로드.
 - `public/robots.txt` — 전체 크롤링 차단 (`Disallow: /`).
-- `.github/workflows/deploy.yml` — main 브랜치 push 시 GitHub Pages 자동 배포.
-- `vite.config.js` — `base: '/life/'` (GitHub Pages 저장소 경로와 일치시킴, 저장소명이 바뀌면 같이 바꿀 것).
-- `.claude/agents/interior-design-assistant.md` — 인테리어 관련 질문/작업을 담당하는 서브에이전트
-- `.claude/skills/interior-notion-project/SKILL.md` — (레거시) Notion 페이지 구조 기록. 더 이상 활발히 쓰지 않지만 과거 정리 내용 참고용으로 유지.
+- `.github/workflows/deploy.yml` — main 브랜치 push 시 GitHub Pages 자동 배포 (Supabase 환경변수를 빌드 시 주입).
+- `vite.config.js` — `base: '/life/'` (GitHub Pages 저장소 경로와 일치, 저장소명이 바뀌면 같이 수정).
+- `.claude/agents/interior-design-assistant.md` — 인테리어 도메인 전담 서브에이전트. 다른 도메인(예산, 계약 검토 등)이 구체화되면 같은 방식으로 도메인별 에이전트를 추가한다.
+- `.claude/skills/interior-notion-project/SKILL.md` — (완전 레거시) 예전에 Notion으로 관리하던 시절의 페이지 구조 기록. Notion은 더 이상 사용하지 않으며, 과거 정리 내용을 참고만 할 때 남겨둠.
+
+## Supabase 테이블: checklist_items
+체크박스 계열 데이터는 전부 이 하나의 테이블에서 `domain` 컬럼으로 구분해서 관리한다 (도메인별로 테이블을 새로 만들지 않는다).
+
+```sql
+create table checklist_items (
+  id text primary key,
+  domain text not null,
+  label text not null,
+  done boolean not null default false,
+  sort_order int not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table checklist_items enable row level security;
+
+create policy "anon read" on checklist_items for select using (true);
+create policy "anon write" on checklist_items for insert with check (true);
+create policy "anon update" on checklist_items for update using (true);
+```
+사용자가 로그인 없이 anon key로만 접근하는 개인용 사이트라서 RLS를 전체 허용으로 열어둔 것 — 인증을 붙이기 전까지는 유지한다. 앱이 처음 로드될 때 `useChecklist`가 각 도메인의 시드 데이터를 자동으로 upsert하므로, 테이블만 만들어두면 항목은 앱이 채운다.
+
+## Windows 로컬 빌드 관련 알려진 이슈
+이 저장소 경로(`C:\workspace\인테리어`)에 한글이 포함되어 있는데, 이 환경에서는 `npm run build`(Vite/esbuild)가 "rendering chunks" 단계 직전에 exit code 127로 결정적으로 실패한다 (`npm run dev`는 정상 동작). 원인은 로컬 esbuild 서브프로세스가 비-ASCII 경로를 다루는 방식의 문제로 추정되며, Vite 5/8 양쪽에서 재현됨. 같은 코드를 ASCII 경로에 복사하면 정상 빌드된다. GitHub Actions(Linux, ASCII 경로)에서는 문제없이 빌드되므로 배포 자체는 영향 없음 — 로컬에서 프로덕션 빌드를 직접 확인해야 할 때만 이슈가 된다. 근본 해결책은 작업 폴더를 ASCII 경로(예: `C:\workspace\life`)로 옮기는 것.
 
 ## 작업 원칙
-- 콘텐츠 변경은 `src/data.js`를 수정하는 방식으로 한다 (Notion 페이지를 더 이상 갱신하지 않음).
+- 콘텐츠/상태 변경은 Supabase 테이블을 갱신하는 방식으로 한다 (Notion 페이지는 더 이상 갱신하지 않음).
 - 대출/정책 관련 정보(디딤돌대출 조건 등)는 시점에 따라 바뀌므로, 참고할 때마다 최신 여부를 재검색해서 확인한다.
 - 폰트는 Pretendard로 전역 통일 (`index.html`의 CDN 링크 + `src/index.css`의 font-family).
 - 이 사이트는 검색 노출을 원치 않는 개인 프로젝트이므로 noindex/robots.txt 설정을 절대 제거하지 않는다.
-- git add/commit은 사용자에게 매번 확인받지 않고 바로 진행한다 (사용자가 명시적으로 요청함, 2026-09-06). 단, force push나 히스토리를 되돌리는 명령(reset --hard, 강제 push 등)처럼 되돌리기 어려운 작업은 예외로 하고 여전히 확인을 구한다.
+- 작업을 마치면 사용자에게 확인받지 않고 바로 git add/commit/push까지 진행한다 (사용자가 명시적으로 요청함, 2026-09-06). 단, force push나 히스토리를 되돌리는 명령(reset --hard, 강제 push 등)처럼 되돌리기 어려운 작업은 예외로 하고 여전히 확인을 구한다.
+- Supabase anon key는 클라이언트에 노출되는 게 정상이지만, 이 사이트는 인증 없이 anon key만으로 읽기/쓰기가 가능한 상태라 URL을 아는 사람은 누구나 데이터를 보고 고칠 수 있다. 민감한 정보(주민번호, 계좌번호 등 원문)는 절대 테이블에 넣지 않는다.

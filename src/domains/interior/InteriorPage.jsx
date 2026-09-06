@@ -1,0 +1,164 @@
+import { useState } from "react";
+import { property, scope, timeline, contractChecklist, progress } from "./data";
+import { useChecklist } from "../../hooks/useChecklist";
+
+const TABS = [
+  { key: "progress", label: "진행 상황" },
+  { key: "property", label: "매물 정보" },
+  { key: "scope", label: "시공 범위" },
+  { key: "timeline", label: "공사 진행 순서" },
+  { key: "checklist", label: "계약/견적 체크리스트" },
+];
+
+function Progress() {
+  const { items, toggle, persistent } = useChecklist("interior_progress", progress);
+  const doneCount = items.filter((p) => p.done).length;
+  return (
+    <section>
+      <h2>인테리어 진행 상황</h2>
+      <p className="muted">
+        {doneCount} / {items.length} 완료
+        {!persistent && " — Supabase 미설정: 새로고침하면 초기화됩니다"}
+      </p>
+      <ul className="progress-list">
+        {items.map((p) => (
+          <li key={p.id} className={p.done ? "done" : ""}>
+            <label className="checkline">
+              <input type="checkbox" checked={p.done} onChange={() => toggle(p.id)} />
+              {p.label}
+            </label>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function PropertyInfo() {
+  return (
+    <section>
+      <h2>매물 정보</h2>
+      <table className="info-table">
+        <tbody>
+          <tr><th>아파트명</th><td>{property.name}</td></tr>
+          <tr><th>주소</th><td>{property.address}</td></tr>
+          <tr><th>동/호수</th><td>{property.unit}</td></tr>
+          <tr><th>매매 성공일</th><td>{property.dealDate}</td></tr>
+          <tr><th>상태</th><td>{property.status}</td></tr>
+          <tr><th>준공연도</th><td>{property.built}</td></tr>
+          <tr><th>단지 규모</th><td>{property.complex}</td></tr>
+          <tr><th>평형</th><td>{property.pyeong}</td></tr>
+          <tr><th>평면도</th><td>{property.floorPlan}</td></tr>
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function Scope() {
+  return (
+    <section>
+      <h2>시공 범위</h2>
+      <p className="muted">견적/발주 기준으로 확정한 시공 항목입니다.</p>
+      <table className="data-table">
+        <thead>
+          <tr><th>#</th><th>항목</th><th>세부 내용</th></tr>
+        </thead>
+        <tbody>
+          {scope.map((s) => (
+            <tr key={s.no}>
+              <td>{s.no}</td>
+              <td>{s.item}</td>
+              <td>{s.detail}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function Timeline() {
+  return (
+    <section>
+      <h2>공사 진행 순서</h2>
+      <p className="muted">
+        착공 예정일 2026.09.20 기준으로 정리했습니다. 실제 착공일이 달라지면 날짜를 다시 계산해서 갱신합니다.
+      </p>
+      <table className="data-table">
+        <thead>
+          <tr><th>날짜</th><th>작업</th></tr>
+        </thead>
+        <tbody>
+          {timeline.map((t, i) => (
+            <tr key={i}>
+              <td className="nowrap">{t.day}</td>
+              <td>{t.task}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ul className="notes">
+        <li>총 소요기간: 약 18일 작업일 기준 (주말·양생 여유 포함 시 실질 3~4주)</li>
+        <li>방수 양생 기간과 도배 건조 기간이 전체 일정의 변수 — 여유 있게 잡을 것</li>
+      </ul>
+    </section>
+  );
+}
+
+function ContractChecklist() {
+  return (
+    <section>
+      <h2>인테리어 계약/견적 체크리스트 (업체 말장난 주의)</h2>
+      <p className="muted">
+        참고: 유튜브 "인테리어 견적서에 '이 단어' 보이면 1초도 망설이지 마세요!"
+      </p>
+      <div className="card-grid">
+        {contractChecklist.map((c) => (
+          <div className="card" key={c.no}>
+            <h3>{c.no}. {c.phrase}</h3>
+            <p>{c.explain}</p>
+            <p className="action">👉 {c.action}</p>
+          </div>
+        ))}
+      </div>
+      <p className="callout">
+        핵심: 인테리어의 성패는 디자인이 아니라 계약서에서 90% 이상 결정된다.
+      </p>
+    </section>
+  );
+}
+
+export default function InteriorPage({ onBack }) {
+  const [tab, setTab] = useState("progress");
+
+  return (
+    <div className="app">
+      <header className="app-header">
+        <button className="back-link" onClick={onBack}>← 홈으로</button>
+        <h1>{property.name} {property.unit} 인테리어</h1>
+        <p className="muted">{property.address}</p>
+      </header>
+
+      <nav className="tabs">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            className={tab === t.key ? "active" : ""}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      <main className="content">
+        {tab === "progress" && <Progress />}
+        {tab === "property" && <PropertyInfo />}
+        {tab === "scope" && <Scope />}
+        {tab === "timeline" && <Timeline />}
+        {tab === "checklist" && <ContractChecklist />}
+      </main>
+    </div>
+  );
+}
