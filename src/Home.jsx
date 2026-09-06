@@ -6,7 +6,7 @@ import { useAllEvents, domainMeta } from "./allEvents";
 import { getEventStatus } from "./components/EventStatusBadge";
 import { progress as interiorProgressSeed } from "./domains/interior/data";
 import { progress as loanProgressSeed } from "./domains/loan/data";
-import { categories as budgetCategoriesSeed } from "./domains/budget/data";
+import { items as budgetItemsSeed } from "./domains/budget/data";
 
 const CATEGORIES = [
   {
@@ -28,7 +28,7 @@ const CATEGORIES = [
     icon: `${import.meta.env.BASE_URL}icons/pixel/coin.png`,
     title: "예산 관리",
     desc: "결혼/인테리어 지출 및 예산 추적",
-    formatProgress: (spent, planned) => `${spent.toLocaleString()}/${planned.toLocaleString()}만원 지출`,
+    formatProgress: (spent, planned) => `₩${spent.toLocaleString()}/₩${planned.toLocaleString()} 지불`,
   },
 ];
 
@@ -156,9 +156,10 @@ function ProgressSummary({ domainStats, events }) {
   );
 }
 
-function budgetPct(categories) {
-  const planned = categories.reduce((sum, c) => sum + c.planned, 0);
-  const spent = categories.reduce((sum, c) => sum + c.spent, 0);
+function budgetPct(items) {
+  const planned = items.reduce((sum, i) => sum + i.total, 0);
+  const unpaid = items.reduce((sum, i) => sum + i.unpaid, 0);
+  const spent = planned - unpaid;
   return { planned, spent, pct: planned === 0 ? 0 : Math.round((spent / planned) * 100) };
 }
 
@@ -166,7 +167,7 @@ export default function Home({ onSelect }) {
   const { events } = useAllEvents();
   const interior = useChecklist("interior_progress", interiorProgressSeed);
   const loan = useChecklist("loan_progress", loanProgressSeed);
-  const { items: budgetCategories } = useContentItems("budget", "categories", budgetCategoriesSeed);
+  const { items: budgetItems } = useContentItems("budget", "items", budgetItemsSeed);
 
   // "전체 평균 진행률"은 체크리스트 기반 프로젝트(인테리어/대출)만 평균낸다 — 예산 소진율은
   // 다른 종류의 지표라 같이 평균 내면 의미가 섞인다. 예산은 카드 자체 진행바로만 보여준다.
@@ -174,7 +175,7 @@ export default function Home({ onSelect }) {
     { key: "interior", items: interior.items, pct: interior.items.length === 0 ? 0 : Math.round((interior.items.filter((i) => i.done).length / interior.items.length) * 100) },
     { key: "loan", items: loan.items, pct: loan.items.length === 0 ? 0 : Math.round((loan.items.filter((i) => i.done).length / loan.items.length) * 100) },
   ];
-  const budget = budgetPct(budgetCategories);
+  const budget = budgetPct(budgetItems);
 
   return (
     <div className="home">

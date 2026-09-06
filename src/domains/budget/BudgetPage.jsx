@@ -1,33 +1,48 @@
 import { useState } from "react";
-import { categories as categoriesSeed } from "./data";
+import { items as itemsSeed } from "./data";
 import { useContentItems } from "../../hooks/useContentItems";
 import ProgressRing from "../../components/ProgressRing";
 import Modal from "../../components/Modal";
 import ErrorBoundary from "../../components/ErrorBoundary";
 
 function won(n) {
-  return `${n.toLocaleString()}만원`;
+  return `₩${n.toLocaleString()}`;
 }
 
-function EditBudgetForm({ category, onSubmit, onCancel }) {
-  const [planned, setPlanned] = useState(String(category.planned));
-  const [spent, setSpent] = useState(String(category.spent));
+function EditItemForm({ item, onSubmit, onCancel }) {
+  const [total, setTotal] = useState(String(item.total));
+  const [unpaid, setUnpaid] = useState(String(item.unpaid));
+  const [paidBy, setPaidBy] = useState(item.paidBy.join(", "));
+  const [memo, setMemo] = useState(item.memo);
 
   function handleSubmit(e) {
     e.preventDefault();
-    onSubmit({ planned: Number(planned) || 0, spent: Number(spent) || 0 });
+    onSubmit({
+      total: Number(total) || 0,
+      unpaid: Number(unpaid) || 0,
+      paidBy: paidBy.split(",").map((s) => s.trim()).filter(Boolean),
+      memo,
+    });
   }
 
   return (
     <form className="add-event-form" onSubmit={handleSubmit}>
-      <h3>{category.name} 금액 수정</h3>
+      <h3>{item.name} 수정</h3>
       <label>
-        계획 예산 (만원)
-        <input type="number" min="0" value={planned} onChange={(e) => setPlanned(e.target.value)} />
+        총 비용 (원)
+        <input type="number" min="0" value={total} onChange={(e) => setTotal(e.target.value)} />
       </label>
       <label>
-        실제 지출 (만원)
-        <input type="number" min="0" value={spent} onChange={(e) => setSpent(e.target.value)} />
+        미지급 금액 (원)
+        <input type="number" min="0" value={unpaid} onChange={(e) => setUnpaid(e.target.value)} />
+      </label>
+      <label>
+        지불인 (쉼표로 구분)
+        <input type="text" value={paidBy} onChange={(e) => setPaidBy(e.target.value)} placeholder="예: 김소윤, 이주엽" />
+      </label>
+      <label>
+        메모
+        <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} />
       </label>
       <div className="add-event-actions">
         <button type="button" className="btn-secondary" onClick={onCancel}>취소</button>
@@ -38,63 +53,71 @@ function EditBudgetForm({ category, onSubmit, onCancel }) {
 }
 
 function BudgetStatus() {
-  const { items: categories, updateItem } = useContentItems("budget", "categories", categoriesSeed);
+  const { items, updateItem } = useContentItems("budget", "items", itemsSeed);
   const [editingIndex, setEditingIndex] = useState(null);
 
-  const totalPlanned = categories.reduce((sum, c) => sum + c.planned, 0);
-  const totalSpent = categories.reduce((sum, c) => sum + c.spent, 0);
-  const totalPct = totalPlanned === 0 ? 0 : Math.round((totalSpent / totalPlanned) * 100);
+  const totalCost = items.reduce((sum, i) => sum + i.total, 0);
+  const totalUnpaid = items.reduce((sum, i) => sum + i.unpaid, 0);
+  const totalPaid = totalCost - totalUnpaid;
+  const pct = totalCost === 0 ? 0 : Math.round((totalPaid / totalCost) * 100);
+
+  const categories = [...new Set(items.map((i) => i.category))];
 
   return (
     <section>
       <h2>예산 현황</h2>
-      <p className="muted">계획 예산과 실제 지출을 항목별로 관리합니다. 금액이 없는 항목은 "수정"으로 직접 입력하세요.</p>
+      <p className="muted">항목별 총 비용과 아직 지불하지 않은 금액을 관리합니다. "수정"으로 직접 입력하세요.</p>
 
       <div className="budget-summary">
-        <ProgressRing pct={totalPct} size={84} stroke={9} />
+        <ProgressRing pct={pct} size={84} stroke={9} />
         <div>
-          <p style={{ margin: 0, fontWeight: 700 }}>총 {won(totalSpent)} / {won(totalPlanned)} 지출</p>
-          <p className="muted" style={{ margin: 0 }}>남은 예산: {won(Math.max(totalPlanned - totalSpent, 0))}</p>
+          <p style={{ margin: 0, fontWeight: 700 }}>{won(totalPaid)} / {won(totalCost)} 지불</p>
+          <p className="muted" style={{ margin: 0 }}>아직 안 낸 금액: {won(totalUnpaid)}</p>
         </div>
       </div>
 
-      <table className="data-table">
-        <thead>
-          <tr><th>항목</th><th>계획 예산</th><th>실제 지출</th><th>남은 예산</th><th>진행률</th><th></th></tr>
-        </thead>
-        <tbody>
-          {categories.map((c, i) => {
-            const pct = c.planned === 0 ? 0 : Math.round((c.spent / c.planned) * 100);
-            const remaining = c.planned - c.spent;
-            return (
-              <tr key={c.no}>
-                <td>{c.name}</td>
-                <td className="nowrap">{won(c.planned)}</td>
-                <td className="nowrap">{won(c.spent)}</td>
-                <td className="nowrap">{won(remaining)}</td>
-                <td>
-                  <div className="category-progress-bar" style={{ width: 100 }}>
-                    <div className="category-progress-fill" style={{ width: `${Math.min(pct, 100)}%`, background: "var(--accent)" }} />
-                  </div>
-                  <span className="muted" style={{ fontSize: "0.78rem" }}>{pct}%</span>
-                </td>
-                <td>
-                  <button className="btn-secondary" onClick={() => setEditingIndex(i)}>수정</button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {categories.map((cat) => {
+        const catEntries = items
+          .map((item, i) => ({ item, i }))
+          .filter(({ item }) => item.category === cat);
+        const catTotal = catEntries.reduce((sum, { item }) => sum + item.total, 0);
+        const catUnpaid = catEntries.reduce((sum, { item }) => sum + item.unpaid, 0);
+        return (
+          <div className="checklist-group" key={cat}>
+            <h4>
+              {cat} <span className="muted">({won(catTotal - catUnpaid)} / {won(catTotal)} 지불)</span>
+            </h4>
+            <table className="data-table">
+              <thead>
+                <tr><th>항목</th><th>총 비용</th><th>미지급</th><th>지불인</th><th>메모</th><th></th></tr>
+              </thead>
+              <tbody>
+                {catEntries.map(({ item, i }) => (
+                  <tr key={i}>
+                    <td>{item.name}</td>
+                    <td className="nowrap">{won(item.total)}</td>
+                    <td className="nowrap">{won(item.unpaid)}</td>
+                    <td>{item.paidBy.length > 0 ? item.paidBy.join(", ") : "—"}</td>
+                    <td>{item.memo || "—"}</td>
+                    <td>
+                      <button className="btn-secondary" onClick={() => setEditingIndex(i)}>수정</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
 
       <p className="callout">
-        "신혼집 인테리어" 계획 예산은 인테리어 도메인 "시공 범위" 탭의 예상 비용 범위(약 1,175~1,835만원) 중간값을 참고로 넣어둔 값입니다 — 실제 견적이 나오면 수정하세요. 월별 지출 계획 그래프는 카테고리별 금액이 채워진 뒤 추가할 예정입니다.
+        "신혼집 인테리어" 총 비용은 인테리어 도메인 "시공 범위" 탭의 예상 비용 범위(약 1,175~1,835만원) 중간값을 참고로 넣어둔 값입니다 — 실제 견적이 나오면 수정하세요.
       </p>
 
       <Modal open={editingIndex !== null} onClose={() => setEditingIndex(null)}>
         {editingIndex !== null && (
-          <EditBudgetForm
-            category={categories[editingIndex]}
+          <EditItemForm
+            item={items[editingIndex]}
             onCancel={() => setEditingIndex(null)}
             onSubmit={(patch) => {
               updateItem(editingIndex, patch);
