@@ -3,6 +3,7 @@ import { finance, progress, tips } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
 import { useContentItems } from "../../hooks/useContentItems";
 import ErrorBoundary from "../../components/ErrorBoundary";
+import Modal from "../../components/Modal";
 
 const TABS = [
   { key: "progress", label: "진행 상황" },
@@ -57,6 +58,7 @@ function Finance() {
   const { items, toggle, persistent } = useChecklist("loan_documents", finance.documents);
   const { items: financeEvents } = useContentItems("loan", "finance_events", finance.events);
   const { items: loanSummary } = useContentItems("loan", "loan_summary", finance.loanSummary);
+  const { items: documentGuide } = useContentItems("loan", "document_guide", finance.documentGuide);
   return (
     <section>
       <h2>자금 계획 — 혼인신고 & 디딤돌대출</h2>
@@ -86,7 +88,7 @@ function Finance() {
         필요 서류 체크리스트
         {!persistent && <span className="muted"> (Supabase 미설정: 저장 안 됨)</span>}
       </h3>
-      <p className="muted">부부 공동 서류(매매계약서 사본, 등기부등본 등)도 각자 본인 몫으로 1부씩 준비합니다. 괄호 안은 발급 유효기간/권장 발급 시점입니다.</p>
+      <p className="muted">매매계약서 사본은 부부 공동 1부만 있으면 되어 "공통"으로 뺐고, 나머지는 각자 1부씩 준비합니다. 괄호 안은 발급 유효기간/권장 발급 시점입니다.</p>
       {groupItems(items).map(({ key, items: groupList }) => {
         const doneCount = groupList.filter((d) => d.done).length;
         return (
@@ -106,6 +108,29 @@ function Finance() {
           </div>
         );
       })}
+
+      <h3>서류별 발급처 & 유효기간</h3>
+      <p className="muted">
+        한국주택금융공사·기금e든든 공식 페이지에는 서류별 유효기간을 명시한 표가 없어서, "은행 관행상 통상 N개월"이라고 적은 항목은 디딤돌대출 특화 규정이 아니라 부동산담보대출 업계 전반의 관행입니다 — 신청 전 담당 은행/기금e든든에 재확인하세요.
+      </p>
+      <table className="data-table">
+        <thead>
+          <tr><th>서류</th><th>발급처</th><th>유효기간</th><th>출처</th></tr>
+        </thead>
+        <tbody>
+          {documentGuide.map((g, i) => (
+            <tr key={i}>
+              <td>{g.doc}</td>
+              <td>{g.office}</td>
+              <td>{g.validity}</td>
+              <td>
+                <a href={g.url} target="_blank" rel="noopener noreferrer">{g.source}</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       <p className="callout">
         정확한 금리/한도/서류/절차는 한국주택금융공사 기금e든든 또는 실제 취급 은행을 통해 최종 확인 필요.
       </p>
@@ -115,30 +140,45 @@ function Finance() {
 
 function Tips() {
   const { items } = useContentItems("loan", "tips", tips);
+  const [selected, setSelected] = useState(null);
+  const selectedItem = selected !== null ? items[selected] : null;
+
   return (
     <section>
       <h2>후기 & 꿀팁</h2>
       <p className="muted">
-        실제 이용자 후기·커뮤니티 질문답변·뉴스기사·유튜브 영상에서 모은 실전 팁입니다. 공식 조건/일정은 "자금 계획" 탭을 참고하세요.
+        실제 이용자 후기·커뮤니티 질문답변·뉴스기사·유튜브 영상에서 모은 실전 팁입니다. 공식 조건/일정은 "자금 계획" 탭을 참고하세요. 항목을 누르면 전체 내용을 볼 수 있습니다.
       </p>
-      <div className="card-grid">
+      <ul className="notice-list">
         {items.map((t, i) => (
-          <div className="card" key={i}>
-            <span className={`tag-badge ${TIP_TYPE_CLASS[t.type] ?? ""}`}>{t.type}</span>
-            <h3>{t.title}</h3>
-            <p>{t.summary}</p>
-            <p className="muted" style={{ marginBottom: 0 }}>
-              출처:{" "}
-              <a href={t.url} target="_blank" rel="noopener noreferrer">
-                {t.source}
-              </a>
-            </p>
-          </div>
+          <li key={i}>
+            <button className="notice-row" onClick={() => setSelected(i)}>
+              <span className={`tag-badge ${TIP_TYPE_CLASS[t.type] ?? ""}`}>{t.type}</span>
+              <span className="notice-title">{t.title}</span>
+              <span className="muted nowrap">{t.source}</span>
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
       <p className="callout">
         후기·기사·영상은 개인/매체별 경험이나 시점에 따라 다를 수 있습니다. 실제 신청 전에는 항상 기금e든든 또는 취급 은행에서 최신 정보를 재확인하세요.
       </p>
+
+      <Modal open={selectedItem !== null} onClose={() => setSelected(null)}>
+        {selectedItem && (
+          <div>
+            <span className={`tag-badge ${TIP_TYPE_CLASS[selectedItem.type] ?? ""}`}>{selectedItem.type}</span>
+            <h3 style={{ marginTop: 12 }}>{selectedItem.title}</h3>
+            <p>{selectedItem.summary}</p>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              출처:{" "}
+              <a href={selectedItem.url} target="_blank" rel="noopener noreferrer">
+                {selectedItem.source}
+              </a>
+            </p>
+          </div>
+        )}
+      </Modal>
     </section>
   );
 }

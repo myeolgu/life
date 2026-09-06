@@ -49,6 +49,82 @@ export const finance = {
     { id: "loan:doc-employment-wife", label: "재직증명서 (또는 사업자등록증 사본)", group: "아내" },
     { id: "loan:doc-networth-wife", label: "본인 자산 확인 서류 (예금잔액증명서 등, 순자산 심사용)", group: "아내" },
   ],
+  // 2026-09-06 웹 리서치 — 서류별 발급처/유효기간. HF·기금e든든 공식 페이지에는
+  // 서류별 유효기간을 명시한 표가 없어서(직접 확인함), "은행 관행상 통상 N개월"이라고
+  // 적은 항목은 디딤돌대출 특화 규정이 아니라 부동산담보대출 업계 관행이다 — 신청 전
+  // 반드시 담당 은행/기금e든든에 재확인. 전부 실제 검색으로 찾은 출처(url)만 포함.
+  documentGuide: [
+    {
+      doc: "주민등록등본",
+      office: "정부24(온라인)·무인발급기·주민센터",
+      validity: "통상 1~3개월 이내 — 자료마다 혼재, 공식 규정 없음",
+      source: "디딤돌대출 준비서류 총정리 (morningstudy.com)",
+      url: "https://morningstudy.com/%EB%94%94%EB%94%A4%EB%8F%8C%EB%8C%80%EC%B6%9C-%EC%A4%80%EB%B9%84%EC%84%9C%EB%A5%98/",
+    },
+    {
+      doc: "주민등록초본",
+      office: "정부24·무인발급기·주민센터",
+      validity: "법적 유효기간 없음, 은행 관행상 통상 3개월 이내",
+      source: "주민등록초본 유효기간·발급방법 정리 (ajd.co.kr)",
+      url: "https://www.ajd.co.kr/contents/basic-tip/detail/%EC%A3%BC%EB%AF%BC%EB%93%B1%EB%A1%9D%EC%B4%88%EB%B3%B8_%EC%9C%A0%ED%9A%A8%EA%B8%B0%EA%B0%84_%EB%B0%9C%EA%B8%89%EB%B0%A9%EB%B2%95_%ED%95%9C%EB%B2%88%EC%97%90_%EC%A0%95%EB%A6%AC-75244",
+    },
+    {
+      doc: "가족관계증명서",
+      office: "대법원 전자가족관계등록시스템(efamily.scourt.go.kr)·정부24·주민센터",
+      validity: "법적 규정 없음, 은행 관행상 통상 3개월 이내 (일부 1개월 요구 사례도 있음)",
+      source: "가족관계증명서 유효기간이 3개월인 이유? (a-ha 질문답변)",
+      url: "https://www.a-ha.io/questions/4ed8ee923257926f831eab98b5489c51",
+    },
+    {
+      doc: "혼인관계증명서 (상세)",
+      office: "대법원 전자가족관계등록시스템·정부24",
+      validity: "확인 안 됨 — 가족관계증명서와 동일하게 통상 3개월 이내로 추정",
+      source: "가족관계등록부등의 증명서 발급 (정부24)",
+      url: "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=97400000004",
+    },
+    {
+      doc: "등기사항전부증명서 (등기부등본)",
+      office: "대법원 인터넷등기소 (iros.go.kr)",
+      validity: "통상 1~3개월 이내 — 자료마다 혼재, 공식 규정 없음",
+      source: "등기사항증명서 (나무위키)",
+      url: "https://namu.wiki/w/%EB%93%B1%EA%B8%B0%EC%82%AC%ED%95%AD%EC%A6%9D%EB%AA%85%EC%84%9C",
+    },
+    {
+      doc: "전입세대확인서 (동거인 포함)",
+      office: "읍/면/동 주민센터 방문 필수 — 정부24 온라인 발급 불가, 대리 발급 시 위임장 필요",
+      validity: "확인 안 됨 — 은행 관행상 통상 1개월 이내로 추정",
+      source: "전입세대확인서 열람(발급) 안내 (정부24)",
+      url: "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000305",
+    },
+    {
+      doc: "소득 증빙 (원천징수영수증/소득금액증명원)",
+      office: "원천징수영수증: 재직 회사 발급(직인 필수) / 소득금액증명원: 국세청 홈택스(hometax.go.kr)",
+      validity: "통상 전년도분 제출, 신규 입사자는 최근 3개월 급여명세로 갈음 가능 — HF 세부 규정 원문 확인 실패",
+      source: "소득금액증명원 발급 방법과 과세기간 선택 기준 (govmanual.com)",
+      url: "https://govmanual.com/2026/08/11/income-certificate-hometax/",
+    },
+    {
+      doc: "재직증명서 (또는 사업자등록증 사본)",
+      office: "재직증명서: 재직 회사 발급(직인 필수) / 사업자등록증: 홈택스 온라인 발급 또는 보유분 사본",
+      validity: "확인 안 됨 — 은행 관행상 통상 1개월 이내",
+      source: "디딤돌대출 준비서류 총정리 (morningstudy.com)",
+      url: "https://morningstudy.com/%EB%94%94%EB%94%A4%EB%8F%8C%EB%8C%80%EC%B6%9C-%EC%A4%80%EB%B9%84%EC%84%9C%EB%A5%98/",
+    },
+    {
+      doc: "예금잔액증명서 등 자산 확인 서류",
+      office: "거래 은행 영업점·온라인/모바일뱅킹 (발급 즉시 해당 계좌 익영업일까지 입출금 제한)",
+      validity: "확인 안 됨 — 신청일 당일/직전 발급본 제출이 관행",
+      source: "잔고증명서(잔액증명서)에 대한 모든 것 (help-me.kr)",
+      url: "https://www.help-me.kr/blog/article/%EC%9E%94%EC%95%A1%EC%A6%9D%EB%AA%85%EC%84%9C%EC%9D%98_%EB%AA%A8%EB%93%A0_%EA%B2%83/",
+    },
+    {
+      doc: "매매계약서 사본",
+      office: "별도 발급기관 없음 — 계약 당사자/공인중개사 보관본 사본",
+      validity: "개념상 없음 (참고: 소유권 이전등기일로부터 3개월 이내 대출 신청이라는 별개 조건은 있음 — 계약서 자체 유효기간 아님)",
+      source: "신청절차 (한국주택금융공사, hf.go.kr)",
+      url: "https://www.hf.go.kr/ko/sub01/sub01_02_02.do",
+    },
+  ],
 };
 
 export const events = [

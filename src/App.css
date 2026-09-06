@@ -494,6 +494,47 @@ th, td {
   color: #12866f;
 }
 
+.notice-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.notice-list li {
+  border-bottom: 1px solid var(--border);
+}
+
+.notice-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 6px;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.notice-row:hover {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.notice-row .tag-badge {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.notice-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
 .map-embed {
   width: 100%;
   height: 360px;
@@ -644,6 +685,20 @@ th, td {
 
   .add-event-dates {
     grid-template-columns: 1fr;
+  }
+
+  .notice-row {
+    flex-wrap: wrap;
+    min-height: 44px;
+  }
+
+  .notice-title {
+    flex-basis: 100%;
+  }
+
+  .notice-row .nowrap {
+    white-space: normal;
+    font-size: 0.78rem;
   }
 }
 
