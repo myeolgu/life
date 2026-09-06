@@ -11,7 +11,11 @@ React(Vite) + Supabase 기반의 개인용 라이프 관리 웹앱입니다. Git
 
 ## 디자인 컨셉 — 픽셀/도트 느낌
 이 사이트의 시각적 컨셉은 **"살짝 픽셀아트(도트) 느낌"**이다 (2026-09-06, 사용자가 명시적으로 확정 — "그 도트 느낌나는 컨셉의 사이트로 만들고 싶어"). 구체적으로:
-- 아이콘/그림은 이모지(🛋️🏦👉 등)를 쓰지 않고, `src/components/PixelIcons.jsx`의 16x16 그리드 단색 픽셀 아이콘(`shape-rendering="crispEdges"`, `currentColor`)으로 통일한다. 새 아이콘이 필요하면 같은 파일에 같은 방식(16x16 grid, rect들로 구성)으로 추가한다 — SVG 곡선/그라디언트를 쓰지 않는다.
+- 아이콘/그림은 이모지(🛋️🏦👉 등)를 쓰지 않는다. **인라인 SVG를 좌표 찍어서 손으로 만들지 말 것** — 2026-09-06에 그렇게 만든 아이콘이 실제로 렌더링해보니 모양이 이상하게 나온 적 있음. 대신 이 순서를 따른다:
+  1. `src/assets/pixel-icons/<이름>-source.svg`로 16x16 그리드 원본을 만든다 (`shape-rendering="crispEdges"`, `<rect>`로만 구성, 곡선/그라디언트 없음). 배경이 필요하면 도메인 색(`domainMeta` 참고, 예: 인테리어 `#b4784a`, 대출 `#5b7df0`)으로 꽉 채운 사각형을 먼저 깔고, 그 위에 크림색(`#fdf6ec`) 등으로 그림을 얹는다. 투명 배경이 필요하면(본문에 흐르는 작은 장식 아이콘 등) 배경 사각형을 생략한다.
+  2. `sharp`를 임시로 설치해서(`npm install -D sharp`, 끝나면 제거) `kernel: 'nearest'`로 PNG 래스터화 (`sharp('원본.svg').resize(128, 128, {kernel:'nearest'}).png().toFile('public/icons/pixel/<이름>.png')`). 픽셀 아트는 곡선을 매끄럽게 스케일하면 안 되므로 반드시 `nearest`를 쓴다.
+  3. **Read 도구로 결과 PNG를 실제로 열어보고 모양을 확인한 다음에** 코드에 반영한다 (확인 없이 좌표만 믿고 넘어가지 않는다).
+  4. 컴포넌트에서는 `<img src={`${import.meta.env.BASE_URL}icons/pixel/<이름>.png`} />`로 불러온다 (`base: '/life/'` 설정 때문에 경로 앞에 `import.meta.env.BASE_URL`을 꼭 붙여야 한다 — 안 붙이면 GitHub Pages 배포에서 경로가 깨진다). CSS에는 `image-rendering: pixelated`를 줘서 확대/축소 시 흐려지지 않게 한다.
 - 앱 아이콘/파비콘(`src/assets/icon-source.svg`)도 같은 원칙(16x16 그리드 픽셀아트 집 모양)으로 만들어져 있다 — 이 파일의 저채도 팔레트(#b4784a 브라운, #fdf6ec 크림, #5b3a24 진브라운, #3fa796 민트, #e0524b 레드)를 다른 UI 요소를 새로 만들 때도 참고할 것.
 - 뱃지/카드처럼 각진 사각형 요소는 완전히 둥글리기보다 살짝만 라운드 처리해서 "블로키"한 느낌을 유지한다 (너무 둥글면 일반적인 모던 UI처럼 보여서 픽셀 컨셉이 흐려짐).
 - 이 컨셉은 아직 아이콘/파비콘 수준으로만 적용돼 있고, 전체 레이아웃/타이포그래피까지 픽셀 컨셉을 확장할지는 미정 — 확장할 때는 이 섹션에 이어서 기록한다.
@@ -25,7 +29,8 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 - `src/App.jsx` — 최상위 라우터. `view` 상태(`home`/`interior`/`loan`/...)로 홈 화면과 각 도메인 페이지를 전환한다. 새 도메인을 추가하면 여기에 분기를 추가.
 - `src/Home.jsx` — 홈 화면. 카테고리 카드(인테리어, 대출...)를 눌러 도메인으로 진입하고, 하단에 `HomeCalendar`로 전체 도메인 일정을 모아 보여준다.
 - `src/allEvents.js` — 각 도메인의 `events` 배열을 모아 홈 캘린더에서 쓰는 통합 목록. 새 도메인에 날짜 있는 일정이 생기면 여기 `domainMeta`에 색상/이름을 등록하고 `allEvents`에 합쳐준다.
-- `src/components/` — 도메인에 종속되지 않는 공용 컴포넌트. `EventStatusBadge`(종료/진행중/예정 배지, 오늘 날짜 기준 자동 계산), `HomeCalendar`(홈 화면 통합 캘린더 — 이벤트 색은 도메인이 아니라 **상태(종료/진행중/예정) 기준**이고, 도메인 구분은 작은 점만 씀), `AddEventForm`(캘린더 "+ 일정 추가" 버튼으로 여는 일정 추가 폼), `Modal`(팝업 — 캘린더 일정 상세/추가 폼 등에 사용), `Accordion`(체크리스트 등 접었다 펼 수 있는 섹션), `ErrorBoundary`(탭/섹션 단위 에러 격리 — 하나가 깨져도 앱 전체가 하얗게 안 되게 함. 새 탭/섹션을 추가할 때는 항상 이걸로 감싼다), `PixelIcons.jsx`(이모지 대신 쓰는 16x16 그리드 단색 픽셀 아이콘 모음 — `PixelHouseIcon`/`PixelRingsIcon`/`PixelArrowIcon`, `currentColor` 기반이라 어디서든 색 상속됨. 새 아이콘이 필요하면 여기에 같은 패턴으로 추가하고, **이모지(🛋️🏦👉 등)를 새로 쓰지 않는다** — 아래 "디자인 컨셉" 참고).
+- `src/components/` — 도메인에 종속되지 않는 공용 컴포넌트. `EventStatusBadge`(종료/진행중/예정 배지, 오늘 날짜 기준 자동 계산), `HomeCalendar`(홈 화면 통합 캘린더 — 이벤트 색은 도메인이 아니라 **상태(종료/진행중/예정) 기준**이고, 도메인 구분은 작은 점만 씀), `AddEventForm`(캘린더 "+ 일정 추가" 버튼으로 여는 일정 추가 폼), `Modal`(팝업 — 캘린더 일정 상세/추가 폼 등에 사용), `Accordion`(체크리스트 등 접었다 펼 수 있는 섹션), `ErrorBoundary`(탭/섹션 단위 에러 격리 — 하나가 깨져도 앱 전체가 하얗게 안 되게 함. 새 탭/섹션을 추가할 때는 항상 이걸로 감싼다).
+- `src/assets/pixel-icons/` — 픽셀 아이콘 SVG 원본 모음 (`house-source.svg`는 없고 `src/assets/icon-source.svg`를 재사용함, `heart-source.svg`, `arrow-source.svg` 등). `public/icons/pixel/`의 PNG들은 전부 여기서 래스터화한 결과물 — 새 아이콘 만드는 절차는 위 "디자인 컨셉" 참고.
 - `src/domains/<도메인>/` — 도메인별 폴더. 각 도메인은 `data.js`(콘텐츠/체크리스트 시드 데이터)와 `<Domain>Page.jsx`(그 도메인 안의 탭/섹션 UI)로 구성된다.
   - `src/domains/interior/` — 인테리어 도메인 (매물정보/시공범위/공사순서(캘린더)/계약체크리스트/진행상황)
   - `src/domains/loan/` — 대출/혼인신고 도메인 (자금계획/진행상황)
