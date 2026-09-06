@@ -7,6 +7,7 @@ import {
   scope as scopeSeed,
   events as eventsSeed,
   contractChecklist as contractChecklistSeed,
+  contractors as contractorsSeed,
   progress,
 } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
@@ -21,6 +22,7 @@ const TABS = [
   { key: "property", label: "매물 정보" },
   { key: "scope", label: "시공 범위" },
   { key: "timeline", label: "공사 진행 순서" },
+  { key: "contractors", label: "시공업체" },
   { key: "checklist", label: "계약/견적 체크리스트" },
 ];
 
@@ -160,6 +162,39 @@ function Timeline() {
   );
 }
 
+function Contractors() {
+  const { items: contractors } = useContentItems("interior", "contractors", contractorsSeed);
+  return (
+    <section>
+      <h2>시공업체 후보</h2>
+      <p className="muted">
+        아직 전부 상담 전입니다. 부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
+      </p>
+      <div className="card-grid">
+        {contractors.map((c) => (
+          <div className="card" key={c.no}>
+            <h3>
+              {c.no}. {c.name}{" "}
+              {c.verified ? (
+                <span className="verify-badge verified">확인됨</span>
+              ) : (
+                <span className="verify-badge unverified">확인 필요</span>
+              )}
+            </h3>
+            <p><b>위치</b> {c.address}</p>
+            <p><b>거리</b> {c.distance}</p>
+            <p><b>연락처</b> {c.contact}</p>
+            <p className="action">{c.note}</p>
+          </div>
+        ))}
+      </div>
+      <p className="callout">
+        상담 전에 계약/견적 체크리스트 탭의 "업체 말장난 TOP5"를 다시 한 번 확인할 것.
+      </p>
+    </section>
+  );
+}
+
 function ContractChecklist() {
   const { items: contractChecklist } = useContentItems("interior", "contract_checklist", contractChecklistSeed);
   return (
@@ -215,6 +250,7 @@ export default function InteriorPage({ onBack }) {
           {tab === "property" && <PropertyInfo />}
           {tab === "scope" && <Scope />}
           {tab === "timeline" && <Timeline />}
+          {tab === "contractors" && <Contractors />}
           {tab === "checklist" && <ContractChecklist />}
         </ErrorBoundary>
       </main>

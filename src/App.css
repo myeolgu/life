@@ -295,6 +295,25 @@ th, td {
   margin-bottom: 0;
 }
 
+.verify-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.verify-badge.verified {
+  background: #e7f9f2;
+  color: #12866f;
+}
+
+.verify-badge.unverified {
+  background: #fdecea;
+  color: #b6301f;
+}
+
 @media (max-width: 600px) {
   .content {
     padding: 18px;
