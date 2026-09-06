@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
-// 시공업체를 아직 못 골라서, 앱을 열면(설치된 PWA 포함) 바로 인테리어로 들어가게 한다.
-// 카테고리 선택 화면("home")은 각 도메인의 "← 홈으로" 버튼으로 여전히 갈 수 있다.
-const DEFAULT_VIEW = "interior";
+// 2026-09-06: 앱을 열면(설치된 PWA 포함) "삶 관리" 홈(카테고리 선택 화면)이 먼저 보이게 한다.
+// 한때 시공업체를 아직 못 골라서 인테리어로 바로 들어가게 했었지만, 도메인이 3개로 늘어난
+// 지금은 홈이 먼저 보이는 게 자연스럽다고 사용자가 확인함.
+const DEFAULT_VIEW = "home";
 
 function getViewFromLocation() {
   const params = new URLSearchParams(window.location.search);
