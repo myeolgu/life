@@ -87,7 +87,7 @@ function BudgetStatus() {
             <h4>
               {cat} <span className="muted">({won(catTotal - catUnpaid)} / {won(catTotal)} 지불)</span>
             </h4>
-            <table className="data-table">
+            <table className="data-table budget-table">
               <thead>
                 <tr><th>항목</th><th>총 비용</th><th>미지급</th><th>지불인</th><th>메모</th><th></th></tr>
               </thead>
