@@ -2,8 +2,16 @@ import { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { property, scope, events, contractChecklist, progress } from "./data";
+import {
+  property as propertySeed,
+  scope as scopeSeed,
+  events as eventsSeed,
+  contractChecklist as contractChecklistSeed,
+  progress,
+} from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
+import { useContentItems } from "../../hooks/useContentItems";
+import { useCalendarEvents } from "../../hooks/useCalendarEvents";
 import EventStatusBadge, { getEventStatus } from "../../components/EventStatusBadge";
 import ErrorBoundary from "../../components/ErrorBoundary";
 import Modal from "../../components/Modal";
@@ -41,6 +49,8 @@ function Progress() {
 }
 
 function PropertyInfo() {
+  const { items } = useContentItems("interior", "property", [propertySeed]);
+  const property = items[0] ?? propertySeed;
   return (
     <section>
       <h2>매물 정보</h2>
@@ -62,6 +72,7 @@ function PropertyInfo() {
 }
 
 function Scope() {
+  const { items: scope } = useContentItems("interior", "scope", scopeSeed);
   return (
     <section>
       <h2>시공 범위</h2>
@@ -97,6 +108,7 @@ function formatRange(ev) {
 }
 
 function Timeline() {
+  const { events } = useCalendarEvents("interior", eventsSeed);
   const [selectedId, setSelectedId] = useState(null);
   const selected = events.find((e) => e.id === selectedId);
 
@@ -149,6 +161,7 @@ function Timeline() {
 }
 
 function ContractChecklist() {
+  const { items: contractChecklist } = useContentItems("interior", "contract_checklist", contractChecklistSeed);
   return (
     <section>
       <h2>인테리어 계약/견적 체크리스트 (업체 말장난 주의)</h2>
@@ -173,6 +186,8 @@ function ContractChecklist() {
 
 export default function InteriorPage({ onBack }) {
   const [tab, setTab] = useState("progress");
+  const { items: propertyItems } = useContentItems("interior", "property", [propertySeed]);
+  const property = propertyItems[0] ?? propertySeed;
 
   return (
     <div className="app">

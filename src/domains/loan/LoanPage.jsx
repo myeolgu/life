@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { finance, progress } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
+import { useContentItems } from "../../hooks/useContentItems";
 import ErrorBoundary from "../../components/ErrorBoundary";
 
 const TABS = [
@@ -34,6 +35,8 @@ function Progress() {
 
 function Finance() {
   const { items, toggle, persistent } = useChecklist("loan_documents", finance.documents);
+  const { items: financeEvents } = useContentItems("loan", "finance_events", finance.events);
+  const { items: loanSummary } = useContentItems("loan", "loan_summary", finance.loanSummary);
   return (
     <section>
       <h2>자금 계획 — 혼인신고 & 디딤돌대출</h2>
@@ -42,7 +45,7 @@ function Finance() {
           <tr><th>일자</th><th>내용</th></tr>
         </thead>
         <tbody>
-          {finance.events.map((e, i) => (
+          {financeEvents.map((e, i) => (
             <tr key={i}>
               <td className="nowrap">{e.date}</td>
               <td>{e.desc}</td>
@@ -54,7 +57,7 @@ function Finance() {
       <h3>2026년 신혼부부 디딤돌대출 요약</h3>
       <p className="muted">검증 필요 — 정책 변동 가능성 있음. 신청 전 최신 정보 재확인.</p>
       <ul className="notes">
-        {finance.loanSummary.map((l, i) => (
+        {loanSummary.map((l, i) => (
           <li key={i}>{l}</li>
         ))}
       </ul>

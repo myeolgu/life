@@ -2,7 +2,7 @@ import { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { allEvents, domainMeta } from "../allEvents";
+import { useAllEvents, domainMeta } from "../allEvents";
 import EventStatusBadge, { getEventStatus } from "./EventStatusBadge";
 import ErrorBoundary from "./ErrorBoundary";
 import Modal from "./Modal";
@@ -20,6 +20,7 @@ function formatRange(ev) {
 }
 
 function HomeCalendarInner({ onNavigate }) {
+  const allEvents = useAllEvents();
   const [selectedId, setSelectedId] = useState(null);
   const selected = allEvents.find((e) => e.id === selectedId);
 
