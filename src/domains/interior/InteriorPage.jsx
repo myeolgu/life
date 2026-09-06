@@ -185,6 +185,11 @@ function Contractors() {
             <p><b>거리</b> {c.distance}</p>
             <p><b>연락처</b> {c.contact}</p>
             <p className="action">{c.note}</p>
+            {c.portfolioUrl && (
+              <a className="event-detail-link" href={c.portfolioUrl} target="_blank" rel="noreferrer">
+                오늘의집 포트폴리오 보기 →
+              </a>
+            )}
           </div>
         ))}
       </div>
@@ -220,7 +225,8 @@ function ContractChecklist() {
 }
 
 export default function InteriorPage({ onBack }) {
-  const [tab, setTab] = useState("progress");
+  // 시공업체를 아직 못 골라서, 인테리어 도메인에 들어오면 일단 이 탭부터 보이게 한다.
+  const [tab, setTab] = useState("contractors");
   const { items: propertyItems } = useContentItems("interior", "property", [propertySeed]);
   const property = propertyItems[0] ?? propertySeed;
 

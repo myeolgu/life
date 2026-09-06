@@ -91,6 +91,7 @@ export const contractors = [
     distance: "부개주공1단지와 같은 부평구 삼산동 — 6곳 중 가장 가까움",
     contact: "032-556-7322 / 010-9090-7322 · miracleid.kr",
     note: "당근마켓에는 계양구 효성동 주소로도 등록돼 있어 지점/정보가 다를 수 있음 — 상담 전 정확한 위치 재확인 필요.",
+    portfolioUrl: "https://ozip.me/BwBrAmB",
     verified: true,
   },
   {
@@ -100,6 +101,7 @@ export const contractors = [
     distance: "인천 계양구 — 부평구와 인접한 같은 인천권",
     contact: "decocross.com (현재 접속 불가)",
     note: "사업자등록 조회 결과 2017년 폐업 상태로 확인됨 — 실제 영업 중인지 반드시 먼저 확인할 것.",
+    portfolioUrl: "https://ozip.me/8hoWCt3",
     verified: false,
   },
   {
@@ -109,6 +111,7 @@ export const contractors = [
     distance: "확인 안 됨",
     contact: "확인 안 됨",
     note: "온라인에서 신뢰할 만한 정보를 찾지 못함 — 네이버지도/카카오맵 검색이나 전화 문의로 직접 확인 필요.",
+    portfolioUrl: "https://ozip.me/Ey9G9Ch",
     verified: false,
   },
   {
@@ -118,6 +121,7 @@ export const contractors = [
     distance: "확인 안 됨",
     contact: "확인 안 됨",
     note: "동명의 생활용품 쇼핑몰(대전 소재)은 찾았으나 업종이 달라 다른 회사로 추정. 실제 인테리어 업체 정보는 못 찾음.",
+    portfolioUrl: "https://ozip.me/umMrsZO",
     verified: false,
   },
   {
@@ -127,6 +131,7 @@ export const contractors = [
     distance: "확인 안 됨",
     contact: "확인 안 됨",
     note: "온라인에서 특정하지 못함 — 흔한 이름이라 동명 업체가 여러 곳일 수 있음.",
+    portfolioUrl: "https://ozip.me/n9vNISz",
     verified: false,
   },
   {
