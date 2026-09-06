@@ -26,11 +26,11 @@ import ProgressRing from "../../components/ProgressRing";
 const arrowIconSrc = `${import.meta.env.BASE_URL}icons/pixel/arrow.png`;
 
 const TABS = [
+  { key: "contractors", label: "시공업체" },
   { key: "progress", label: "진행 상황" },
   { key: "property", label: "매물 정보" },
   { key: "scope", label: "시공 범위" },
   { key: "timeline", label: "공사 진행 순서" },
-  { key: "contractors", label: "시공업체" },
   { key: "checklist", label: "계약/견적 체크리스트" },
 ];
 
