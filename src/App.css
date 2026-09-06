@@ -326,6 +326,22 @@ th, td {
   color: #b6301f;
 }
 
+.map-embed {
+  width: 100%;
+  height: 360px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 12px 0;
+  border: 1px solid var(--border);
+}
+
+.map-embed iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
 @media (max-width: 600px) {
   .content {
     padding: 18px;

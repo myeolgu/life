@@ -174,8 +174,25 @@ function Timeline() {
   );
 }
 
+const APARTMENT_ADDRESS = "부개주공1단지 인천광역시 부평구 부개동";
+
+function stripDongSuffix(address) {
+  return address.replace(/\s*\([^)]*\)\s*$/, "");
+}
+
+function buildContractorsMapUrl(contractors) {
+  const origin = encodeURIComponent(APARTMENT_ADDRESS);
+  const stops = contractors
+    .filter((c) => c.address && c.address !== "확인 안 됨")
+    .map((c) => encodeURIComponent(stripDongSuffix(c.address)));
+  if (stops.length === 0) return null;
+  return `https://maps.google.com/maps?saddr=${origin}&daddr=${stops.join("+to:")}`;
+}
+
 function Contractors() {
   const { items: contractors } = useContentItems("interior", "contractors", contractorsSeed);
+  const mapUrl = buildContractorsMapUrl(contractors);
+
   return (
     <section>
       <h2>시공업체 후보</h2>
@@ -205,6 +222,25 @@ function Contractors() {
           </div>
         ))}
       </div>
+
+      {mapUrl && (
+        <>
+          <h3>위치 비교 (부개주공1단지 → 업체 4곳 경로)</h3>
+          <p className="muted">부개주공1단지에서 각 업체까지 경로와 거리를 한 지도에서 볼 수 있습니다.</p>
+          <div className="map-embed">
+            <iframe
+              title="시공업체 위치 지도"
+              src={`${mapUrl}&output=embed`}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+          <a className="event-detail-link" href={mapUrl} target="_blank" rel="noreferrer">
+            구글맵 새 창에서 크게 보기 →
+          </a>
+        </>
+      )}
+
       <p className="callout">
         상담 전에 계약/견적 체크리스트 탭의 "업체 말장난 TOP5"를 다시 한 번 확인할 것.
       </p>
