@@ -340,6 +340,25 @@ th, td {
   margin-bottom: 20px;
 }
 
+.calendar-wrap .fc-theme-standard {
+  background: #ffffff;
+}
+
+.calendar-wrap .fc-scrollgrid,
+.calendar-wrap .fc-scrollgrid-sync-table,
+.calendar-wrap table {
+  background: #ffffff;
+}
+
+.calendar-wrap .fc-scrollgrid-section-header > * {
+  height: auto;
+}
+
+.calendar-wrap .fc-col-header-cell-cushion {
+  display: block;
+  padding: 8px 4px;
+}
+
 .calendar-wrap .fc-toolbar {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
