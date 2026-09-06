@@ -544,6 +544,66 @@ th, td {
   }
 }
 
+@media (max-width: 480px) {
+  .home {
+    padding: 40px 14px;
+  }
+
+  .app {
+    padding: 20px 14px 60px;
+  }
+
+  .home h1 {
+    font-size: 1.6rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .content {
+    padding: 14px;
+    overflow-x: auto;
+  }
+
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+  }
+
+  .tabs button {
+    flex-shrink: 0;
+    min-height: 44px;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .event-detail-link,
+  .back-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .category-card,
+  .summary-card,
+  .phase-card,
+  .card {
+    padding: 14px;
+  }
+
+  .checkline,
+  .checklist label {
+    min-height: 44px;
+  }
+
+  .add-event-dates {
+    grid-template-columns: 1fr;
+  }
+}
+
 .calendar-wrap {
   --fc-border-color: var(--border);
   --fc-page-bg-color: var(--surface);
