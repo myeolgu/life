@@ -80,26 +80,78 @@ function PropertyInfo() {
   );
 }
 
+const SPACE_ORDER = ["현관", "주방", "베란다", "욕실", "공통", "공통(전기)"];
+const PRIORITY_BADGE = { "높음": "#e0524b", "중간": "#ff863b", "낮음": "#888888" };
+
+function groupBySpace(items) {
+  const groups = {};
+  items.forEach((item) => {
+    (groups[item.space] ??= []).push(item);
+  });
+  const keys = [...SPACE_ORDER.filter((k) => groups[k]), ...Object.keys(groups).filter((k) => !SPACE_ORDER.includes(k))];
+  return keys.map((key) => ({ key, items: groups[key] }));
+}
+
+function parseCostRange(costRange) {
+  const [min, max] = (costRange ?? "").split("~").map((s) => parseInt(s, 10));
+  return { min: Number.isFinite(min) ? min : 0, max: Number.isFinite(max) ? max : 0 };
+}
+
 function Scope() {
   const { items: scope } = useContentItems("interior", "scope", scopeSeed);
+  const totals = scope.reduce(
+    (acc, s) => {
+      const { min, max } = parseCostRange(s.costRange);
+      acc.min += min;
+      acc.max += max;
+      acc.priority[s.priority] = (acc.priority[s.priority] ?? 0) + 1;
+      return acc;
+    },
+    { min: 0, max: 0, priority: {} }
+  );
+
   return (
     <section>
       <h2>시공 범위</h2>
-      <p className="muted">견적/발주 기준으로 확정한 시공 항목입니다.</p>
-      <table className="data-table">
-        <thead>
-          <tr><th>#</th><th>항목</th><th>세부 내용</th></tr>
-        </thead>
-        <tbody>
-          {scope.map((s) => (
-            <tr key={s.no}>
-              <td>{s.no}</td>
-              <td>{s.item}</td>
-              <td>{s.detail}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <p className="muted">견적/발주 기준으로 확정한 시공 항목을 공간별로 정리했습니다.</p>
+
+      {groupBySpace(scope).map(({ key, items }) => (
+        <div className="checklist-group" key={key}>
+          <h4>{key}</h4>
+          <table className="data-table">
+            <thead>
+              <tr><th>항목</th><th>세부 내용</th><th>우선순위</th><th>예상 기간</th><th>예상 비용</th></tr>
+            </thead>
+            <tbody>
+              {items.map((s) => (
+                <tr key={s.no}>
+                  <td>{s.item}</td>
+                  <td>{s.detail}</td>
+                  <td>
+                    <span className="status-badge" style={{ background: PRIORITY_BADGE[s.priority] ?? "#888888" }}>
+                      {s.priority}
+                    </span>
+                  </td>
+                  <td className="nowrap">{s.duration}</td>
+                  <td className="nowrap">{s.costRange}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+
+      <div className="callout">
+        <b>전체 시공 범위 요약</b> — 총 {scope.length}개 항목 (
+        {SPACE_ORDER.filter((k) => scope.some((s) => s.space === k)).length}개 공간)
+        · 우선순위: 높음 {totals.priority["높음"] ?? 0} · 중간 {totals.priority["중간"] ?? 0} · 낮음 {totals.priority["낮음"] ?? 0}
+        <br />
+        예상 비용 합계: 약 {totals.min.toLocaleString()}~{totals.max.toLocaleString()}만원
+        <br />
+        <span className="muted" style={{ margin: 0 }}>
+          ⚠️ 시공업체 상담/견적 전 일반 시세 기준 개략 추정치입니다 — 확정 금액이 아닙니다. 실제 공사 일정은 "공사 진행 순서" 탭 캘린더를 참고하세요 (여러 항목이 같은 날 함께 진행될 수 있어 기간을 단순 합산하지 않습니다).
+        </span>
+      </div>
     </section>
   );
 }

@@ -10,23 +10,31 @@ export const property = {
   floorPlan: "미확보 — 추후 실측/도면 확보 필요",
 };
 
+// 2026-09-06: 공간(space)/우선순위/예상 기간/예상 비용 필드 추가.
+// 비용은 시공업체 상담 전이라 실제 견적이 아니라 일반적 시세 기준 개략 범위다 — Scope() 하단
+// 요약 박스와 화면에 "확정 금액 아님" 캐벗을 명시한다. 기간은 공사 진행 순서 탭 캘린더와 별개로,
+// 항목 단독 작업 시 기준의 대략치(실제로는 여러 항목이 같은 날 겹쳐 진행됨).
 export const scope = [
-  { no: 1, item: "도배 전체", detail: "LX 베스띠 화이트 실크벽지, 벽 + 천장 전체" },
-  { no: 2, item: "장판 전체 교체", detail: "약 3.0T" },
-  { no: 3, item: "천장 몰딩", detail: "전체 교체" },
-  { no: 4, item: "걸레받이", detail: "전체 교체" },
-  { no: 5, item: "문 교체", detail: "방문 3개 + 욕실문 1개 = 총 4개" },
-  { no: 6, item: "현관문", detail: "문 교체 X, 안쪽 인테리어 필름 시공" },
-  { no: 7, item: "싱크대", detail: "전체 교체 X, 상판 교체 + 하부장 필름 시공" },
-  { no: 8, item: "베란다 바닥 타일", detail: "기존 타일 철거 포함, 전체 교체" },
-  { no: 9, item: "현관 바닥 타일", detail: "기존 타일 철거 포함, 전체 교체" },
-  { no: 10, item: "콘센트 증설", detail: "약 3~4개 추가" },
+  { no: 1, item: "도배 전체", detail: "LX 베스띠 화이트 실크벽지, 벽 + 천장 전체", space: "공통", priority: "높음", duration: "3일", costRange: "150~200만원" },
+  { no: 2, item: "장판 전체 교체", detail: "약 3.0T", space: "공통", priority: "높음", duration: "2일", costRange: "100~150만원" },
+  { no: 3, item: "천장 몰딩", detail: "전체 교체", space: "공통", priority: "중간", duration: "1일", costRange: "50~80만원" },
+  { no: 4, item: "걸레받이", detail: "전체 교체", space: "공통", priority: "낮음", duration: "1일", costRange: "30~50만원" },
+  { no: 5, item: "문 교체", detail: "방문 3개 + 욕실문 1개 = 총 4개", space: "공통", priority: "중간", duration: "1일", costRange: "60~100만원" },
+  { no: 6, item: "현관문", detail: "문 교체 X, 안쪽 인테리어 필름 시공", space: "현관", priority: "낮음", duration: "1일", costRange: "15~25만원" },
+  { no: 7, item: "싱크대", detail: "전체 교체 X, 상판 교체 + 하부장 필름 시공", space: "주방", priority: "중간", duration: "1일", costRange: "80~150만원" },
+  { no: 8, item: "베란다 바닥 타일", detail: "기존 타일 철거 포함, 전체 교체", space: "베란다", priority: "중간", duration: "1일", costRange: "80~120만원" },
+  { no: 9, item: "현관 바닥 타일", detail: "기존 타일 철거 포함, 전체 교체", space: "현관", priority: "중간", duration: "1일", costRange: "40~70만원" },
+  { no: 10, item: "콘센트 증설", detail: "약 3~4개 추가", space: "공통(전기)", priority: "낮음", duration: "1일", costRange: "20~40만원" },
   {
     no: 11,
     item: "화장실 전체 리모델링",
     detail: "철거, 방수, 벽/바닥 타일, 변기, 세면대, 수전, 천장, 환풍기, 조명 등 전체 교체",
+    space: "욕실",
+    priority: "높음",
+    duration: "5일",
+    costRange: "400~600만원",
   },
-  { no: 12, item: "공통", detail: "기존 자재 철거비, 폐기물 처리비, 기본 마감 및 보수비 포함" },
+  { no: 12, item: "공통", detail: "기존 자재 철거비, 폐기물 처리비, 기본 마감 및 보수비 포함", space: "공통", priority: "높음", duration: "1일", costRange: "150~250만원" },
 ];
 
 // 착공 예정일: 2026.12.12 (잔금일 2026.12.10 이후 — 사용자 확정, 2026-09-06)
