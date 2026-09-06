@@ -46,11 +46,26 @@ create table checklist_items (
 
 alter table checklist_items enable row level security;
 
-create policy "anon read" on checklist_items for select using (true);
-create policy "anon write" on checklist_items for insert with check (true);
-create policy "anon update" on checklist_items for update using (true);
+create policy "anon read" on checklist_items for select to anon, authenticated using (true);
+create policy "anon write" on checklist_items for insert to anon, authenticated with check (true);
+create policy "anon update" on checklist_items for update to anon, authenticated using (true) with check (true);
+create policy "anon delete" on checklist_items for delete to anon, authenticated using (true);
 ```
-사용자가 로그인 없이 anon key로만 접근하는 개인용 사이트라서 RLS를 전체 허용으로 열어둔 것 — 인증을 붙이기 전까지는 유지한다. 앱이 처음 로드될 때 `useChecklist`가 각 도메인의 시드 데이터를 자동으로 upsert하므로, 테이블만 만들어두면 항목은 앱이 채운다.
+`to anon, authenticated`를 꼭 명시할 것 — 역할을 안 적으면(기본 PUBLIC) 실제로는 insert가 RLS에 막히는 걸 2026-09-06에 겪었다. 사용자가 로그인 없이 anon key로만 접근하는 개인용 사이트라서 RLS를 전체 허용으로 열어둔 것 — 인증을 붙이기 전까지는 유지한다. 앱이 처음 로드될 때 `useChecklist`가 각 도메인의 시드 데이터를 자동으로 upsert하므로, 테이블만 만들어두면 항목은 앱이 채운다.
+
+## Supabase 스키마 변경 자동화 — Management API
+스키마(테이블/정책 등)를 바꿔야 할 때, 매번 사용자에게 SQL Editor에서 직접 실행해달라고 부탁할 필요 없다. `.env`(gitignore 처리, 커밋 안 됨)에 `SUPABASE_PROJECT_REF`와 `SUPABASE_MANAGEMENT_TOKEN`이 들어있으면, 아래처럼 Management API로 Claude가 직접 SQL을 실행할 수 있다:
+
+```bash
+curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
+  -H "Authorization: Bearer $SUPABASE_MANAGEMENT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"<실행할 SQL>"}'
+```
+
+- `SUPABASE_MANAGEMENT_TOKEN`은 프로젝트를 통째로 제어하는 강력한 토큰이다. **VITE_ 접두사를 붙이지 말 것** — 붙이면 Vite가 클라이언트 번들에 그대로 노출시켜버린다. 절대 앱 코드/커밋에 넣지 않는다.
+- `.env`가 없거나 이 값들이 비어있으면, 사용자에게 https://supabase.com/dashboard/account/tokens 에서 토큰 발급을 요청한다 (Access Tokens → Generate new token, 생성 직후 한 번만 전체 값이 보이므로 그 자리에서 바로 복사해야 함).
+- DB 비밀번호(사용자가 프로젝트 생성 시 설정한 것)로 직접 Postgres 접속(`db.<ref>.supabase.co:5432`)은 이 환경에서 DNS 자체가 안 잡혀서 실패했다 (IPv6 전용으로 추정) — Management API 방식이 더 안정적이니 이걸 기본으로 쓴다.
 
 ## Windows 로컬 빌드 관련 알려진 이슈
 이 저장소 경로(`C:\workspace\인테리어`)에 한글이 포함되어 있는데, 이 환경에서는 `npm run build`(Vite/esbuild)가 "rendering chunks" 단계 직전에 exit code 127로 결정적으로 실패한다 (`npm run dev`는 정상 동작). 원인은 로컬 esbuild 서브프로세스가 비-ASCII 경로를 다루는 방식의 문제로 추정되며, Vite 5/8 양쪽에서 재현됨. 같은 코드를 ASCII 경로에 복사하면 정상 빌드된다. GitHub Actions(Linux, ASCII 경로)에서는 문제없이 빌드되므로 배포 자체는 영향 없음 — 로컬에서 프로덕션 빌드를 직접 확인해야 할 때만 이슈가 된다. 근본 해결책은 작업 폴더를 ASCII 경로(예: `C:\workspace\life`)로 옮기는 것.
