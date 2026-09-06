@@ -1,6 +1,6 @@
 # life — 개인 삶 통합 관리 사이트
 
-React(Vite) + Supabase 기반의 개인용 라이프 관리 웹앱입니다. GitHub 저장소 `myeolgu/life`에 연결되어 있고 GitHub Pages로 배포됩니다. 검색엔진에는 노출하지 않는 비공개 성격의 개인 사이트입니다.
+React(Vite) + Supabase 기반의 개인용 라이프 관리 웹앱입니다. GitHub 저장소 `myeolgu/life`에 연결되어 있고 GitHub Pages로 배포됩니다. 검색엔진에는 노출하지 않는 비공개 성격의 개인 사이트입니다. PWA로도 동작해서 (매니페스트 + 서비스워커) 휴대폰/데스크탑에 앱처럼 설치할 수 있다.
 
 관리 대상은 인테리어 하나로 한정되지 않고, 삶 전반의 여러 도메인을 다룹니다. 현재 도메인:
 - **인테리어** — 부개주공1단지 아파트 107동 1001호(인천광역시 부평구 부개동, 25평/전용 약 59㎡) 인테리어 준비 (매물정보/시공범위/공사순서/계약견적 체크리스트)
@@ -26,7 +26,8 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 - `index.html` — `<meta name="robots" content="noindex, nofollow">`로 검색엔진 노출 차단, Pretendard 폰트 CDN 로드.
 - `public/robots.txt` — 전체 크롤링 차단 (`Disallow: /`).
 - `.github/workflows/deploy.yml` — main 브랜치 push 시 GitHub Pages 자동 배포 (Supabase 환경변수를 빌드 시 주입).
-- `vite.config.js` — `base: '/life/'` (GitHub Pages 저장소 경로와 일치, 저장소명이 바뀌면 같이 수정).
+- `vite.config.js` — `base: '/life/'` (GitHub Pages 저장소 경로와 일치, 저장소명이 바뀌면 같이 수정) + `VitePWA` 플러그인 설정(매니페스트, 아이콘, 서비스워커).
+- `src/assets/icon-source.svg` — 앱 아이콘 원본. `public/icons/`의 PNG들은 이걸 래스터화해서 만든 결과물이라, 아이콘을 바꾸려면 이 SVG를 고치고 다시 PNG로 렌더링(192/512/마스커블 512)해야 한다.
 - `.claude/agents/interior-design-assistant.md` — 인테리어 도메인 전담 서브에이전트. 다른 도메인(예산, 계약 검토 등)이 구체화되면 같은 방식으로 도메인별 에이전트를 추가한다.
 - `.claude/skills/interior-notion-project/SKILL.md` — (완전 레거시) 예전에 Notion으로 관리하던 시절의 페이지 구조 기록. Notion은 더 이상 사용하지 않으며, 과거 정리 내용을 참고만 할 때 남겨둠.
 
