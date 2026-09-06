@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { finance, progress } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
+import ErrorBoundary from "../../components/ErrorBoundary";
 
 const TABS = [
   { key: "progress", label: "진행 상황" },
@@ -102,8 +103,10 @@ export default function LoanPage({ onBack }) {
       </nav>
 
       <main className="content">
-        {tab === "progress" && <Progress />}
-        {tab === "finance" && <Finance />}
+        <ErrorBoundary key={tab}>
+          {tab === "progress" && <Progress />}
+          {tab === "finance" && <Finance />}
+        </ErrorBoundary>
       </main>
     </div>
   );

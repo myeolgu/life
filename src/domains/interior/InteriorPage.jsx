@@ -5,6 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { property, scope, events, contractChecklist, progress } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
 import EventStatusBadge, { getEventStatus } from "../../components/EventStatusBadge";
+import ErrorBoundary from "../../components/ErrorBoundary";
 
 const TABS = [
   { key: "progress", label: "진행 상황" },
@@ -191,11 +192,13 @@ export default function InteriorPage({ onBack }) {
       </nav>
 
       <main className="content">
-        {tab === "progress" && <Progress />}
-        {tab === "property" && <PropertyInfo />}
-        {tab === "scope" && <Scope />}
-        {tab === "timeline" && <Timeline />}
-        {tab === "checklist" && <ContractChecklist />}
+        <ErrorBoundary key={tab}>
+          {tab === "progress" && <Progress />}
+          {tab === "property" && <PropertyInfo />}
+          {tab === "scope" && <Scope />}
+          {tab === "timeline" && <Timeline />}
+          {tab === "checklist" && <ContractChecklist />}
+        </ErrorBoundary>
       </main>
     </div>
   );

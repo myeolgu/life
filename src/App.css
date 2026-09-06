@@ -307,6 +307,21 @@ th, td {
   font-weight: 700;
 }
 
+.error-fallback {
+  background: #fdecea;
+  border: 1px solid #f3c2bc;
+  border-radius: 12px;
+  padding: 16px 20px;
+  color: #7a2e26;
+}
+
+.error-fallback pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8rem;
+  margin: 8px 0 0;
+}
+
 .event-detail h3 {
   margin: 0 0 8px;
   font-size: 1.05rem;
