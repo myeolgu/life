@@ -6,7 +6,8 @@ import { supabase, isSupabaseConfigured } from "../lib/supabaseClient";
  * Supabase가 설정되어 있지 않으면 로컬 상태로만 동작한다 (새로고침 시 초기값으로 리셋).
  *
  * @param {string} domain - 체크리스트 그룹 키 (예: "progress", "finance")
- * @param {{id: string, label: string, done?: boolean}[]} seedItems - 기본 항목
+ * @param {{id: string, label: string, done?: boolean, group?: string}[]} seedItems - 기본 항목.
+ *   group을 주면 화면에서 그 값으로 항목을 묶어 표시할 수 있다 (예: "남편"/"아내"/"공통").
  */
 export function useChecklist(domain, seedItems) {
   const [items, setItems] = useState(seedItems);
@@ -19,7 +20,7 @@ export function useChecklist(domain, seedItems) {
     async function load() {
       const { data, error } = await supabase
         .from("checklist_items")
-        .select("id, label, done")
+        .select("id, label, done, group_label")
         .eq("domain", domain)
         .order("sort_order", { ascending: true });
 
@@ -37,6 +38,7 @@ export function useChecklist(domain, seedItems) {
           domain,
           label: item.label,
           done: item.done ?? false,
+          group_label: item.group ?? null,
           sort_order: index,
         }));
         const { error: insertError } = await supabase
@@ -53,7 +55,9 @@ export function useChecklist(domain, seedItems) {
       }
 
       if (!cancelled) {
-        setItems(data.map((row) => ({ id: row.id, label: row.label, done: row.done })));
+        setItems(
+          data.map((row) => ({ id: row.id, label: row.label, done: row.done, group: row.group_label ?? undefined }))
+        );
         setLoading(false);
       }
     }

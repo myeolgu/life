@@ -11,15 +11,20 @@ export const finance = {
     "금리: 연 2.85%~4.15% (2026년 1월 기준, 소득·기간별 변동)",
     "심사 기준: LTV 최대 70%, DTI 최대 60%",
   ],
+  // 은행/기금e든든에 부부가 함께 내는 서류는 group: "공통", 각자 본인 것을 따로 준비해야 하는
+  // 서류는 group: "남편"/"아내"로 나눠서 각자 한 부씩 넣어둔다.
   documents: [
-    { id: "loan:marriage-cert", label: "혼인관계증명서 (발급 후)" },
-    { id: "loan:family-cert", label: "가족관계증명서" },
-    { id: "loan:resident-reg", label: "주민등록등본/초본" },
-    { id: "loan:income-proof", label: "소득 증빙 (원천징수영수증 또는 소득금액증명원)" },
-    { id: "loan:employment-cert", label: "재직증명서" },
-    { id: "loan:sale-contract", label: "매매계약서 사본" },
-    { id: "loan:registry", label: "등기부등본" },
-    { id: "loan:net-worth", label: "부부 순자산 확인 서류" },
+    { id: "loan:marriage-cert", label: "혼인관계증명서 (발급 후)", group: "공통" },
+    { id: "loan:resident-reg", label: "주민등록등본/초본", group: "공통" },
+    { id: "loan:sale-contract", label: "매매계약서 사본", group: "공통" },
+    { id: "loan:registry", label: "등기부등본", group: "공통" },
+    { id: "loan:net-worth", label: "부부 순자산 확인 서류", group: "공통" },
+    { id: "loan:family-cert-husband", label: "가족관계증명서", group: "남편" },
+    { id: "loan:income-proof-husband", label: "소득 증빙 (원천징수영수증 또는 소득금액증명원)", group: "남편" },
+    { id: "loan:employment-cert-husband", label: "재직증명서", group: "남편" },
+    { id: "loan:family-cert-wife", label: "가족관계증명서", group: "아내" },
+    { id: "loan:income-proof-wife", label: "소득 증빙 (원천징수영수증 또는 소득금액증명원)", group: "아내" },
+    { id: "loan:employment-cert-wife", label: "재직증명서", group: "아내" },
   ],
 };
 

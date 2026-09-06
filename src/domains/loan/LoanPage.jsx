@@ -33,6 +33,18 @@ function Progress() {
   );
 }
 
+const GROUP_ORDER = ["공통", "남편", "아내"];
+
+function groupItems(items) {
+  const groups = {};
+  items.forEach((item) => {
+    const key = item.group ?? "기타";
+    (groups[key] ??= []).push(item);
+  });
+  const orderedKeys = [...GROUP_ORDER.filter((k) => groups[k]), ...Object.keys(groups).filter((k) => !GROUP_ORDER.includes(k))];
+  return orderedKeys.map((key) => ({ key, items: groups[key] }));
+}
+
 function Finance() {
   const { items, toggle, persistent } = useChecklist("loan_documents", finance.documents);
   const { items: financeEvents } = useContentItems("loan", "finance_events", finance.events);
@@ -66,15 +78,26 @@ function Finance() {
         필요 서류 체크리스트
         {!persistent && <span className="muted"> (Supabase 미설정: 저장 안 됨)</span>}
       </h3>
-      <ul className="checklist">
-        {items.map((d) => (
-          <li key={d.id}>
-            <label>
-              <input type="checkbox" checked={d.done} onChange={() => toggle(d.id)} /> {d.label}
-            </label>
-          </li>
-        ))}
-      </ul>
+      <p className="muted">공통 서류는 한 부만, 남편·아내 서류는 각자 본인 것을 준비합니다.</p>
+      {groupItems(items).map(({ key, items: groupList }) => {
+        const doneCount = groupList.filter((d) => d.done).length;
+        return (
+          <div className="checklist-group" key={key}>
+            <h4>
+              {key} <span className="muted">({doneCount}/{groupList.length})</span>
+            </h4>
+            <ul className="checklist">
+              {groupList.map((d) => (
+                <li key={d.id}>
+                  <label>
+                    <input type="checkbox" checked={d.done} onChange={() => toggle(d.id)} /> {d.label}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
       <p className="callout">
         정확한 금리/한도/서류/절차는 한국주택금융공사 기금e든든 또는 실제 취급 은행을 통해 최종 확인 필요.
       </p>

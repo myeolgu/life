@@ -45,6 +45,7 @@ create table checklist_items (
   domain text not null,
   label text not null,
   done boolean not null default false,
+  group_label text,
   sort_order int not null default 0,
   updated_at timestamptz not null default now()
 );
@@ -57,6 +58,8 @@ create policy "anon update" on checklist_items for update to anon, authenticated
 create policy "anon delete" on checklist_items for delete to anon, authenticated using (true);
 ```
 `to anon, authenticated`를 꼭 명시할 것 — 역할을 안 적으면(기본 PUBLIC) 실제로는 insert가 RLS에 막히는 걸 2026-09-06에 겪었다. 사용자가 로그인 없이 anon key로만 접근하는 개인용 사이트라서 RLS를 전체 허용으로 열어둔 것 — 인증을 붙이기 전까지는 유지한다. 앱이 처음 로드될 때 `useChecklist`가 각 도메인의 시드 데이터를 자동으로 upsert하므로, 테이블만 만들어두면 항목은 앱이 채운다.
+
+`group_label`은 선택 필드다 — 체크리스트 항목을 화면에서 소그룹으로 묶어 보여줘야 할 때 쓴다 (예: 디딤돌대출 필요서류를 "공통"/"남편"/"아내"로 나눠서 보여줌, `LoanPage.jsx`의 `groupItems` 참고). 그룹이 필요 없는 체크리스트는 그냥 `null`로 둔다.
 
 ## Supabase 테이블: content_items, calendar_events
 체크박스가 아닌 나머지 콘텐츠(매물정보/시공범위/계약체크리스트/자금계획 요약 등)와 캘린더 일정도 각각 이 두 테이블에서 관리한다. 둘 다 `checklist_items`와 같은 RLS 정책 구조(`to anon, authenticated`로 select/insert/update/delete 전체 허용)를 쓴다.

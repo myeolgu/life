@@ -73,8 +73,7 @@ function HomeCalendarInner({ onNavigate }) {
             const status = getEventStatus(ev);
             const meta = domainMeta[ev.domain];
             return (
-              <div className={`cal-event status-${status}`}>
-                <span className="legend-dot" style={{ background: meta.color }} />
+              <div className={`cal-event status-${status}`} style={{ borderLeft: `3px solid ${meta.color}` }}>
                 <EventStatusBadge status={status} />
                 <span className="cal-event-title">{arg.event.title}</span>
               </div>
