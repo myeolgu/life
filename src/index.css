@@ -1,0 +1,41 @@
+:root {
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --border: #e5e1da;
+  --text: #262220;
+  --text-muted: #7a7369;
+  --accent: #b4784a;
+  --accent-soft: #f1e4d6;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--accent);
+}
