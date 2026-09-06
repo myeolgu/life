@@ -9,8 +9,15 @@ import { supabase, isSupabaseConfigured } from "../lib/supabaseClient";
  * @param {{id: string, label: string, done?: boolean, group?: string}[]} seedItems - 기본 항목.
  *   group을 주면 화면에서 그 값으로 항목을 묶어 표시할 수 있다 (예: "남편"/"아내"/"공통").
  */
+// 시드 배열이 done을 명시하지 않은 항목(체크 안 된 게 기본값)도 있어서, 여기서 항상
+// boolean으로 정규화한다 — 안 그러면 초기 렌더의 checked={undefined}가 Supabase 로드 후
+// checked={false}로 바뀌면서 React가 "uncontrolled to controlled" 경고를 낸다 (2026-09-06 발견).
+function normalize(seedItems) {
+  return seedItems.map((item) => ({ ...item, done: item.done ?? false }));
+}
+
 export function useChecklist(domain, seedItems) {
-  const [items, setItems] = useState(seedItems);
+  const [items, setItems] = useState(() => normalize(seedItems));
   const [loading, setLoading] = useState(isSupabaseConfigured);
 
   useEffect(() => {
@@ -48,7 +55,7 @@ export function useChecklist(domain, seedItems) {
           console.error("checklist_items 초기화 실패:", insertError.message);
         }
         if (!cancelled) {
-          setItems(seedItems);
+          setItems(normalize(seedItems));
           setLoading(false);
         }
         return;
