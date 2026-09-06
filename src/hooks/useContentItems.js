@@ -66,5 +66,19 @@ export function useContentItems(domain, section, seedItems) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [domain, section]);
 
-  return { items, loading, persistent: isSupabaseConfigured };
+  /**
+   * id로 항목 하나를 찾아 data를 병합 갱신한다 (예: 예산 항목의 금액 수정).
+   * 항목 배열은 index 기반 id(`${domain}:${section}:${index}`)를 쓰므로, 그 규칙을 그대로 따른다.
+   */
+  async function updateItem(index, patch) {
+    const id = `${domain}:${section}:${index}`;
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+    if (!isSupabaseConfigured) return;
+    const { data: current } = await supabase.from("content_items").select("data").eq("id", id).single();
+    const nextData = { ...(current?.data ?? items[index]), ...patch };
+    const { error } = await supabase.from("content_items").update({ data: nextData }).eq("id", id);
+    if (error) console.error("content_items 수정 실패:", error.message);
+  }
+
+  return { items, loading, persistent: isSupabaseConfigured, updateItem };
 }

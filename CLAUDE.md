@@ -5,7 +5,7 @@ React(Vite) + Supabase 기반의 개인용 라이프 관리 웹앱입니다. Git
 관리 대상은 인테리어 하나로 한정되지 않고, 삶 전반의 여러 도메인을 다룹니다. 현재 도메인:
 - **인테리어** — 부개주공1단지 아파트 107동 1001호(인천광역시 부평구 부개동, 25평/전용 약 59㎡) 인테리어 준비 (매물정보/시공범위/공사순서/계약견적 체크리스트)
 - **디딤돌 대출/계약** — 혼인신고, 신혼부부 디딤돌대출 신청 진행 상황과 자금 계획
-- **예산 관리** — 지출/예산 추적 (구축 예정)
+- **예산 관리** — 지출/예산 추적 (카테고리별 계획 예산/실제 지출, `src/domains/budget/`)
 
 새 도메인(재정, 건강, 일정 등)이 추가될 수 있으므로, 구조를 짤 때 특정 도메인에 종속되지 않게 일반화해서 만든다.
 
@@ -34,10 +34,11 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 - `src/domains/<도메인>/` — 도메인별 폴더. 각 도메인은 `data.js`(콘텐츠/체크리스트 시드 데이터)와 `<Domain>Page.jsx`(그 도메인 안의 탭/섹션 UI)로 구성된다.
   - `src/domains/interior/` — 인테리어 도메인 (매물정보/시공범위/공사순서(캘린더)/계약체크리스트/진행상황)
   - `src/domains/loan/` — 대출/혼인신고 도메인 (자금계획/진행상황)
+  - `src/domains/budget/` — 예산 관리 도메인 (카테고리별 계획 예산/실제 지출, `content_items`에 `updateItem`으로 직접 수정 가능)
   - 새 도메인을 추가할 때는 이 패턴을 그대로 따라 `src/domains/<새도메인>/` 폴더를 만들고, `Home.jsx`의 카테고리 목록과 `App.jsx`의 라우팅에 추가한다.
 - `src/hooks/` — Supabase와 동기화하는 공용 훅 3종. 전부 "테이블에 행이 없으면 시드 upsert, 있으면 DB 값 사용" 패턴이다.
   - `useChecklist.js` — 체크박스 목록 (`checklist_items` 테이블). 도메인마다 다른 `domain` 문자열 키로 구분: `interior_progress`, `loan_progress`, `loan_documents` 등.
-  - `useContentItems(domain, section, seedItems)` — 체크박스가 아닌 표/카드/텍스트 목록 (`content_items` 테이블). 각 항목을 JSONB로 그대로 저장해서 형태가 자유롭다 (매물 정보 한 덩어리, 시공 범위 표 행, 카드 목록 등 전부 이걸로 관리).
+  - `useContentItems(domain, section, seedItems)` — 체크박스가 아닌 표/카드/텍스트 목록 (`content_items` 테이블). 각 항목을 JSONB로 그대로 저장해서 형태가 자유롭다 (매물 정보 한 덩어리, 시공 범위 표 행, 카드 목록 등 전부 이걸로 관리). `updateItem(index, patch)`로 항목 하나의 필드를 부분 수정할 수 있다 (예: 예산 도메인의 금액 수정 — id는 `${domain}:${section}:${index}` 규칙을 그대로 따르므로 seed 배열의 순서/개수를 바꾸면 index가 어긋난다는 점에 유의).
   - `useCalendarEvents(domain, seedEvents)` — 날짜 있는 일정 (`calendar_events` 테이블). FullCalendar 이벤트 형식(`id/title/start/end/description`)을 그대로 주고받는다.
 - `src/lib/supabaseClient.js` — Supabase 클라이언트 초기화.
 - `index.html` — `<meta name="robots" content="noindex, nofollow">`로 검색엔진 노출 차단, Pretendard 폰트 CDN 로드.

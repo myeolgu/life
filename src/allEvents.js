@@ -6,6 +6,7 @@ import { useCalendarEvents } from "./hooks/useCalendarEvents";
 export const domainMeta = {
   interior: { label: "인테리어", color: "#b4784a" },
   loan: { label: "대출·혼인신고", color: "#5b7df0" },
+  budget: { label: "예산 관리", color: "#3fa796" },
 };
 
 /**

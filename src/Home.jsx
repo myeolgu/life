@@ -1,10 +1,12 @@
 import HomeCalendar from "./components/HomeCalendar";
 import ProgressRing from "./components/ProgressRing";
 import { useChecklist } from "./hooks/useChecklist";
+import { useContentItems } from "./hooks/useContentItems";
 import { useAllEvents, domainMeta } from "./allEvents";
 import { getEventStatus } from "./components/EventStatusBadge";
 import { progress as interiorProgressSeed } from "./domains/interior/data";
 import { progress as loanProgressSeed } from "./domains/loan/data";
+import { categories as budgetCategoriesSeed } from "./domains/budget/data";
 
 const CATEGORIES = [
   {
@@ -12,12 +14,21 @@ const CATEGORIES = [
     icon: `${import.meta.env.BASE_URL}icons/pixel/house.png`,
     title: "인테리어",
     desc: "부개주공1단지 107동 1001호",
+    formatProgress: (done, total) => `${done}/${total} 완료`,
   },
   {
     key: "loan",
     icon: `${import.meta.env.BASE_URL}icons/pixel/heart.png`,
     title: "대출 / 혼인신고",
     desc: "신혼부부 디딤돌대출 & 혼인신고",
+    formatProgress: (done, total) => `${done}/${total} 완료`,
+  },
+  {
+    key: "budget",
+    icon: `${import.meta.env.BASE_URL}icons/pixel/coin.png`,
+    title: "예산 관리",
+    desc: "결혼/인테리어 지출 및 예산 추적",
+    formatProgress: (spent, planned) => `${spent.toLocaleString()}/${planned.toLocaleString()}만원 지출`,
   },
 ];
 
@@ -60,7 +71,7 @@ function CategoryCard({ category, doneCount, total, events, onSelect }) {
         <div className="category-progress-bar">
           <div className="category-progress-fill" style={{ width: `${pct}%`, background: accent }} />
         </div>
-        <span className="category-progress-label">{pct}% · {doneCount}/{total} 완료</span>
+        <span className="category-progress-label">{pct}% · {category.formatProgress(doneCount, total)}</span>
       </div>
 
       {milestone && (
@@ -145,26 +156,48 @@ function ProgressSummary({ domainStats, events }) {
   );
 }
 
+function budgetPct(categories) {
+  const planned = categories.reduce((sum, c) => sum + c.planned, 0);
+  const spent = categories.reduce((sum, c) => sum + c.spent, 0);
+  return { planned, spent, pct: planned === 0 ? 0 : Math.round((spent / planned) * 100) };
+}
+
 export default function Home({ onSelect }) {
   const { events } = useAllEvents();
   const interior = useChecklist("interior_progress", interiorProgressSeed);
   const loan = useChecklist("loan_progress", loanProgressSeed);
+  const { items: budgetCategories } = useContentItems("budget", "categories", budgetCategoriesSeed);
 
-  const domainStats = [
+  // "전체 평균 진행률"은 체크리스트 기반 프로젝트(인테리어/대출)만 평균낸다 — 예산 소진율은
+  // 다른 종류의 지표라 같이 평균 내면 의미가 섞인다. 예산은 카드 자체 진행바로만 보여준다.
+  const taskDomainStats = [
     { key: "interior", items: interior.items, pct: interior.items.length === 0 ? 0 : Math.round((interior.items.filter((i) => i.done).length / interior.items.length) * 100) },
     { key: "loan", items: loan.items, pct: loan.items.length === 0 ? 0 : Math.round((loan.items.filter((i) => i.done).length / loan.items.length) * 100) },
   ];
+  const budget = budgetPct(budgetCategories);
 
   return (
     <div className="home">
       <h1>삶 관리</h1>
       <p className="muted">관리할 카테고리를 선택하세요.</p>
 
-      <ProgressSummary domainStats={domainStats} events={events} />
+      <ProgressSummary domainStats={taskDomainStats} events={events} />
 
       <div className="category-grid">
         {CATEGORIES.map((category) => {
-          const stats = domainStats.find((d) => d.key === category.key);
+          if (category.key === "budget") {
+            return (
+              <CategoryCard
+                key={category.key}
+                category={category}
+                doneCount={budget.spent}
+                total={budget.planned}
+                events={events}
+                onSelect={onSelect}
+              />
+            );
+          }
+          const stats = taskDomainStats.find((d) => d.key === category.key);
           const doneCount = stats.items.filter((i) => i.done).length;
           return (
             <CategoryCard
