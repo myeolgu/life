@@ -16,6 +16,7 @@ import { useCalendarEvents } from "../../hooks/useCalendarEvents";
 import EventStatusBadge, { getEventStatus } from "../../components/EventStatusBadge";
 import ErrorBoundary from "../../components/ErrorBoundary";
 import Modal from "../../components/Modal";
+import Accordion from "../../components/Accordion";
 
 const TABS = [
   { key: "progress", label: "진행 상황" },
@@ -32,20 +33,22 @@ function Progress() {
   return (
     <section>
       <h2>인테리어 진행 상황</h2>
-      <p className="muted">
-        {doneCount} / {items.length} 완료
-        {!persistent && " — Supabase 미설정: 새로고침하면 초기화됩니다"}
-      </p>
-      <ul className="progress-list">
-        {items.map((p) => (
-          <li key={p.id} className={p.done ? "done" : ""}>
-            <label className="checkline">
-              <input type="checkbox" checked={p.done} onChange={() => toggle(p.id)} />
-              {p.label}
-            </label>
-          </li>
-        ))}
-      </ul>
+      <Accordion title={`체크리스트 (${doneCount}/${items.length} 완료)`} defaultOpen>
+        {!persistent && <p className="muted">Supabase 미설정: 새로고침하면 초기화됩니다</p>}
+        <ul className="progress-list">
+          {items.map((p) => (
+            <li key={p.id} className={p.done ? "done" : ""}>
+              <label className="checkline">
+                <input type="checkbox" checked={p.done} onChange={() => toggle(p.id)} />
+                {p.label}
+              </label>
+            </li>
+          ))}
+        </ul>
+      </Accordion>
+      <h3>공사 일정</h3>
+      <p className="muted">뭘 해야 할지 한눈에 보려고 캘린더도 같이 둡니다. 날짜를 클릭하면 상세 내용이 팝업으로 나옵니다.</p>
+      <ConstructionCalendar />
     </section>
   );
 }
@@ -109,17 +112,13 @@ function formatRange(ev) {
   return endIso === ev.start ? formatDate(ev.start) : `${formatDate(ev.start)} ~ ${formatDate(endIso)}`;
 }
 
-function Timeline() {
+function ConstructionCalendar() {
   const { events } = useCalendarEvents("interior", eventsSeed);
   const [selectedId, setSelectedId] = useState(null);
   const selected = events.find((e) => e.id === selectedId);
 
   return (
-    <section>
-      <h2>공사 진행 순서</h2>
-      <p className="muted">
-        잔금(입주)일 2026.12.10 이후, 착공 예정일 2026.12.12 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다. 날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.
-      </p>
+    <>
       <div className="calendar-wrap">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
@@ -154,6 +153,18 @@ function Timeline() {
           </div>
         )}
       </Modal>
+    </>
+  );
+}
+
+function Timeline() {
+  return (
+    <section>
+      <h2>공사 진행 순서</h2>
+      <p className="muted">
+        잔금(입주)일 2026.12.10 이후, 착공 예정일 2026.12.12 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다. 날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.
+      </p>
+      <ConstructionCalendar />
       <ul className="notes">
         <li>총 소요기간: 약 18일 작업일 기준 (주말·양생 여유 포함 시 실질 3~4주)</li>
         <li>방수 양생 기간과 도배 건조 기간이 전체 일정의 변수 — 여유 있게 잡을 것</li>

@@ -37,6 +37,18 @@ export const events = [
     end: "2026-09-16",
     description: "접수 후 10~14일 소요 예상. 발급되면 신혼부부 디딤돌대출 신청을 진행한다.",
   },
+  {
+    id: "dress-fitting",
+    title: "드레스 가봉",
+    start: "2026-10-03",
+    description: "드레스 가봉 — 오전 10시",
+  },
+  {
+    id: "wedding-photoshoot",
+    title: "웨딩 촬영",
+    start: "2026-10-23",
+    description: "웨딩 촬영 — 메종드힐, 오전 11시",
+  },
 ];
 
 export const progress = [
