@@ -400,6 +400,58 @@ th, td {
   font-family: inherit;
 }
 
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0 28px;
+}
+
+.phase-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.phase-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.phase-card-top h4 {
+  margin: 0 0 2px;
+  font-size: 0.98rem;
+}
+
+.phase-ring {
+  flex-shrink: 0;
+}
+
+.phase-section b {
+  font-size: 0.82rem;
+}
+
+.phase-section ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.phase-contact {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+
 .pin-dot {
   display: flex;
   align-items: center;

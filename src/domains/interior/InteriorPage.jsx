@@ -9,6 +9,7 @@ import {
   property as propertySeed,
   scope as scopeSeed,
   events as eventsSeed,
+  phases as phasesSeed,
   contractChecklist as contractChecklistSeed,
   contractors as contractorsSeed,
   progress,
@@ -213,13 +214,88 @@ function ConstructionCalendar() {
   );
 }
 
+function phaseProgressPct(start, end, today = new Date()) {
+  const s = new Date(`${start}T00:00:00`);
+  const e = new Date(`${end}T00:00:00`);
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if (t <= s) return 0;
+  if (t >= e) return 100;
+  return Math.round(((t - s) / (e - s)) * 100);
+}
+
+function PhaseProgressRing({ start, end }) {
+  const pct = phaseProgressPct(start, end);
+  const r = 20;
+  const c = 2 * Math.PI * r;
+  const offset = c - (pct / 100) * c;
+  return (
+    <svg width="56" height="56" viewBox="0 0 56 56" className="phase-ring" aria-label={`${pct}% 진행`}>
+      <circle cx="28" cy="28" r={r} fill="none" stroke="var(--border)" strokeWidth="6" />
+      <circle
+        cx="28"
+        cy="28"
+        r={r}
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth="6"
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform="rotate(-90 28 28)"
+      />
+      <text x="28" y="32" textAnchor="middle" fontSize="12" fontWeight="700" fill="var(--text)">
+        {pct}%
+      </text>
+    </svg>
+  );
+}
+
+function PhaseCard({ phase }) {
+  return (
+    <div className="phase-card">
+      <div className="phase-card-top">
+        <div>
+          <h4>{phase.title}</h4>
+          <p className="muted" style={{ margin: 0 }}>{formatDate(phase.start)} ~ {formatDate(phase.end)}</p>
+        </div>
+        <PhaseProgressRing start={phase.start} end={phase.end} />
+      </div>
+      <div className="phase-section">
+        <b>주요 작업</b>
+        <ul>{phase.tasks.map((t, i) => <li key={i}>{t}</li>)}</ul>
+      </div>
+      {phase.approvals.length > 0 && (
+        <div className="phase-section">
+          <b>필요 문서/승인</b>
+          <ul>{phase.approvals.map((a, i) => <li key={i}>{a}</li>)}</ul>
+        </div>
+      )}
+      <div className="phase-section">
+        <b>주의사항</b>
+        <ul>{phase.cautions.map((c, i) => <li key={i}>{c}</li>)}</ul>
+      </div>
+      <p className="phase-contact">{phase.contact}</p>
+    </div>
+  );
+}
+
 function Timeline() {
+  const { items: phases } = useContentItems("interior", "phases", phasesSeed);
   return (
     <section>
       <h2>공사 진행 순서</h2>
       <p className="muted">
-        잔금(입주)일 2026.12.10 이후, 착공 예정일 2026.12.12 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다. 날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.
+        잔금(입주)일 2026.12.10 이후, 착공 예정일 2026.12.12 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다.
       </p>
+
+      <div className="phase-grid">
+        {phases.map((p) => (
+          <PhaseCard key={p.id} phase={p} />
+        ))}
+      </div>
+
+      <h3>날짜별 상세 캘린더</h3>
+      <p className="muted">날짜(일정)를 클릭하면 상세 내용이 팝업으로 나옵니다.</p>
       <ConstructionCalendar />
       <ul className="notes">
         <li>총 소요기간: 약 18일 작업일 기준 (주말·양생 여유 포함 시 실질 3~4주)</li>
