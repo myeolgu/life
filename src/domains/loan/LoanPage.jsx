@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { finance, progress } from "./data";
+import { finance, progress, tips } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
 import { useContentItems } from "../../hooks/useContentItems";
 import ErrorBoundary from "../../components/ErrorBoundary";
@@ -7,7 +7,15 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 const TABS = [
   { key: "progress", label: "진행 상황" },
   { key: "finance", label: "자금 계획" },
+  { key: "tips", label: "후기 & 꿀팁" },
 ];
+
+const TIP_TYPE_CLASS = {
+  후기: "type-review",
+  기사: "type-news",
+  유튜브: "type-youtube",
+  정보: "type-info",
+};
 
 function Progress() {
   const { items, toggle, persistent } = useChecklist("loan_progress", progress);
@@ -33,7 +41,7 @@ function Progress() {
   );
 }
 
-const GROUP_ORDER = ["남편", "아내"];
+const GROUP_ORDER = ["공통", "남편", "아내"];
 
 function groupItems(items) {
   const groups = {};
@@ -105,6 +113,36 @@ function Finance() {
   );
 }
 
+function Tips() {
+  const { items } = useContentItems("loan", "tips", tips);
+  return (
+    <section>
+      <h2>후기 & 꿀팁</h2>
+      <p className="muted">
+        실제 이용자 후기·커뮤니티 질문답변·뉴스기사·유튜브 영상에서 모은 실전 팁입니다. 공식 조건/일정은 "자금 계획" 탭을 참고하세요.
+      </p>
+      <div className="card-grid">
+        {items.map((t, i) => (
+          <div className="card" key={i}>
+            <span className={`tag-badge ${TIP_TYPE_CLASS[t.type] ?? ""}`}>{t.type}</span>
+            <h3>{t.title}</h3>
+            <p>{t.summary}</p>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              출처:{" "}
+              <a href={t.url} target="_blank" rel="noopener noreferrer">
+                {t.source}
+              </a>
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="callout">
+        후기·기사·영상은 개인/매체별 경험이나 시점에 따라 다를 수 있습니다. 실제 신청 전에는 항상 기금e든든 또는 취급 은행에서 최신 정보를 재확인하세요.
+      </p>
+    </section>
+  );
+}
+
 export default function LoanPage({ onBack }) {
   const [tab, setTab] = useState("progress");
 
@@ -132,6 +170,7 @@ export default function LoanPage({ onBack }) {
         <ErrorBoundary key={tab}>
           {tab === "progress" && <Progress />}
           {tab === "finance" && <Finance />}
+          {tab === "tips" && <Tips />}
         </ErrorBoundary>
       </main>
     </div>
