@@ -204,6 +204,31 @@ export const contractors = [
   },
 ];
 
+// 2026-09-06: 계약/견적 체크리스트 탭 하단에 추가한 실무 체크박스 목록.
+// 위 contractChecklist("업체 말장난 TOP5")가 '조심해야 할 표현'을 설명한다면, 이건 실제 상담/계약
+// 자리에서 하나씩 체크하며 확인할 항목 리스트다. 각 항목에 확인 방법/주의점을 괄호로 붙였다.
+export const contractReview = [
+  { id: "interior:cr-quote-detail", label: "시공비 항목별 세부 내역 확인 (평면도 기준 항목·수량·단가 명시 — '일체' 같은 뭉뚱그린 표현 주의)", group: "견적서 검토" },
+  { id: "interior:cr-quote-split", label: "자재비/노무비 분리 표시 확인 (항목별로 나뉘어 있는지, 뭉뚱그려져 있으면 재요청)", group: "견적서 검토" },
+  { id: "interior:cr-quote-vat", label: "부가가치세(VAT) 포함 여부 확인 (VAT 별도 소문자 표기 주의 — 모든 업체 견적을 VAT 포함 기준으로 비교)", group: "견적서 검토" },
+  { id: "interior:cr-quote-extra", label: "추가 비용 가능성 확인 (폐기물 처리비·엘리베이터 보양비·주차비 등이 항목에 포함됐는지)", group: "견적서 검토" },
+  { id: "interior:cr-quote-payment", label: "선금/기성금/준공금 비율 확인 (선금 50% 이상이면 위험 신호 — 공정률별 4~5회 분할 지급 요구)", group: "견적서 검토" },
+  { id: "interior:cr-quote-period", label: "공사 기간 명시 여부 확인 (착공일·준공일을 구체적 날짜로 — '약 O주' 같은 모호한 표현 지양)", group: "견적서 검토" },
+  { id: "interior:cr-quote-warranty", label: "하자 책임(보증) 기간 확인 (통상 1~2년, 방수 등은 더 길게 — 항목별 보증기간 명시 여부)", group: "견적서 검토" },
+  { id: "interior:cr-quote-as", label: "하자 처리 방법 및 연락처 확인 (신고 후 며칠 내 방문/AS인지, 담당자 연락처가 명시됐는지)", group: "견적서 검토" },
+  { id: "interior:cr-quote-deposit", label: "계약금 반환 조건 확인 (해지 시 반환 비율·업체 귀책 사유 포함 여부)", group: "견적서 검토" },
+  { id: "interior:cr-contract-info", label: "계약자 정보 정확히 기입 확인 (이름·주소·연락처가 신분증과 일치하는지 대조)", group: "계약서 검토" },
+  { id: "interior:cr-contract-location", label: "시공 위치 및 면적 명확히 표시 확인 (동/호수·전용면적이 등기부등본과 일치하는지)", group: "계약서 검토" },
+  { id: "interior:cr-contract-period", label: "공사 기간(시작일-준공일) 명시 확인 (구체적 날짜 + 지연 시 배상 조항 여부)", group: "계약서 검토" },
+  { id: "interior:cr-contract-drawing", label: "설계도/도면 첨부 여부 확인 (평면도·자재 배치도가 첨부됐는지, 없으면 요청)", group: "계약서 검토" },
+  { id: "interior:cr-contract-material", label: "사용 자재 브랜드/등급 명시 확인 (회사명만이 아니라 제품명·모델번호·규격까지)", group: "계약서 검토" },
+  { id: "interior:cr-contract-schedule", label: "기성금 지급일정 명확히 확인 (회차 수와 각 회차 지급 조건(공정률)이 구체적인지)", group: "계약서 검토" },
+  { id: "interior:cr-contract-damages", label: "손해배상 조건 및 금액 명시 확인 (하자·지연 발생 시 배상 기준(금액/비율)이 있는지)", group: "계약서 검토" },
+  { id: "interior:cr-contract-termination", label: "계약 해제 조건 명확히 확인 (귀책별 해제 절차와 정산 방법이 명시됐는지)", group: "계약서 검토" },
+  { id: "interior:cr-contract-signature", label: "서명/도장 확인 (업체 대표자 서명·도장이 사업자등록증상 대표자와 일치하는지)", group: "계약서 검토" },
+  { id: "interior:cr-contract-copy", label: "계약서 사본 수령 확인 (서명 즉시 원본 아닌 사본을 반드시 받았는지)", group: "계약서 검토" },
+];
+
 export const progress = [
   { id: "interior:deal-done", done: true, label: "매매 계약 체결" },
   { id: "interior:balance-payment", done: false, label: "잔금 납부 및 입주 (예정: 2026.12.10)" },

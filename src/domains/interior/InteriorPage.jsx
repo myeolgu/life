@@ -11,6 +11,7 @@ import {
   events as eventsSeed,
   phases as phasesSeed,
   contractChecklist as contractChecklistSeed,
+  contractReview as contractReviewSeed,
   contractors as contractorsSeed,
   progress,
 } from "./data";
@@ -409,8 +410,20 @@ function Contractors() {
   );
 }
 
+const REVIEW_GROUP_ORDER = ["견적서 검토", "계약서 검토"];
+
+function groupReviewItems(items) {
+  const groups = {};
+  items.forEach((item) => {
+    (groups[item.group] ??= []).push(item);
+  });
+  return REVIEW_GROUP_ORDER.filter((k) => groups[k]).map((key) => ({ key, items: groups[key] }));
+}
+
 function ContractChecklist() {
   const { items: contractChecklist } = useContentItems("interior", "contract_checklist", contractChecklistSeed);
+  const { items: reviewItems, toggle, persistent } = useChecklist("interior_contract_review", contractReviewSeed);
+
   return (
     <section>
       <h2>인테리어 계약/견적 체크리스트 (업체 말장난 주의)</h2>
@@ -431,6 +444,29 @@ function ContractChecklist() {
       <p className="callout">
         핵심: 인테리어의 성패는 디자인이 아니라 계약서에서 90% 이상 결정된다.
       </p>
+
+      <h3>
+        상담·계약 자리 체크리스트
+        {!persistent && <span className="muted"> (Supabase 미설정: 저장 안 됨)</span>}
+      </h3>
+      <p className="muted">괄호 안은 확인 방법·주의할 점입니다. 실제 상담/계약 전에 하나씩 체크하세요.</p>
+      {groupReviewItems(reviewItems).map(({ key, items }) => {
+        const doneCount = items.filter((d) => d.done).length;
+        return (
+          <div className="checklist-group" key={key}>
+            <h4>{key} <span className="muted">({doneCount}/{items.length})</span></h4>
+            <ul className="checklist">
+              {items.map((d) => (
+                <li key={d.id}>
+                  <label>
+                    <input type="checkbox" checked={d.done} onChange={() => toggle(d.id)} /> {d.label}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </section>
   );
 }
