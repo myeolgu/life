@@ -1,5 +1,6 @@
 import { events as interiorSeed } from "./domains/interior/data";
 import { events as loanSeed } from "./domains/loan/data";
+import { events as budgetSeed } from "./domains/budget/data";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
 
 // 홈 화면 캘린더에서 도메인을 구분하는 색상/이름 (순수 UI 메타데이터라 Supabase로 옮기지 않는다).
@@ -17,15 +18,18 @@ export const domainMeta = {
 export function useAllEvents() {
   const interior = useCalendarEvents("interior", interiorSeed);
   const loan = useCalendarEvents("loan", loanSeed);
+  const budget = useCalendarEvents("budget", budgetSeed);
 
   const events = [
     ...interior.events.map((e) => ({ ...e, id: `interior:${e.id}`, domain: "interior" })),
     ...loan.events.map((e) => ({ ...e, id: `loan:${e.id}`, domain: "loan" })),
+    ...budget.events.map((e) => ({ ...e, id: `budget:${e.id}`, domain: "budget" })),
   ];
 
   async function addEvent(domain, event) {
     if (domain === "interior") return interior.addEvent(event);
     if (domain === "loan") return loan.addEvent(event);
+    if (domain === "budget") return budget.addEvent(event);
   }
 
   return { events, addEvent };

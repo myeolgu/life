@@ -163,18 +163,6 @@ export const events = [
     description:
       "디딤돌대출 실행일 = 잔금 지급일 목표. 약정일(11/3)로부터 5주 이상 지나므로, 발급 유효기간이 1개월인 서류(등본·초본·가족관계증명서 등)는 재발급/재제출 필요 여부를 은행에 미리 확인.",
   },
-  {
-    id: "dress-fitting",
-    title: "드레스 가봉",
-    start: "2026-10-03",
-    description: "드레스 가봉 — 오전 10시",
-  },
-  {
-    id: "wedding-photoshoot",
-    title: "웨딩 촬영",
-    start: "2026-10-23",
-    description: "웨딩 촬영 — 메종드힐, 오전 11시",
-  },
 ];
 
 export const progress = [

@@ -69,10 +69,14 @@ function HomeCalendarInner({ onNavigate }) {
           events={allEvents}
           eventClick={(info) => setSelectedId(info.event.id)}
           eventContent={(arg) => {
-            const ev = allEvents.find((e) => e.id === arg.event.id);
-            const status = getEventStatus(ev);
+            // allEvents에서 다시 찾지 않고 FullCalendar가 이미 들고 있는 arg.event에서 바로 읽는다 —
+            // 도메인을 옮기는 등 id가 바뀌는 순간 배열 룩업이 잠깐 어긋나면서
+            // "Cannot read properties of undefined (reading 'start')" 크래시가 난 적이 있어서(2026-09-06) 고침.
+            const domain = arg.event.extendedProps.domain;
+            const status = getEventStatus({ start: arg.event.startStr, end: arg.event.endStr || undefined });
             return (
               <div className={`cal-event status-${status}`}>
+                <span className="legend-dot" style={{ background: domainMeta[domain]?.color }} />
                 <EventStatusBadge status={status} />
                 <span className="cal-event-title">{arg.event.title}</span>
               </div>
