@@ -33,7 +33,7 @@ function EditItemForm({ item, onSubmit, onCancel }) {
         <input type="number" min="0" value={total} onChange={(e) => setTotal(e.target.value)} />
       </label>
       <label>
-        미지급 금액 (원)
+        남은 금액 (원)
         <input type="number" min="0" value={unpaid} onChange={(e) => setUnpaid(e.target.value)} />
       </label>
       <label>
@@ -89,11 +89,11 @@ function BudgetStatus() {
             </h4>
             <table className="data-table budget-table">
               <thead>
-                <tr><th>항목</th><th>총 비용</th><th>미지급</th><th>지불인</th><th>메모</th><th></th></tr>
+                <tr><th>항목</th><th>총 비용</th><th>남은 금액</th><th>지불인</th><th>메모</th><th></th></tr>
               </thead>
               <tbody>
                 {catEntries.map(({ item, i }) => (
-                  <tr key={i}>
+                  <tr key={i} className={item.unpaid === 0 ? "budget-paid-row" : ""}>
                     <td>{item.name}</td>
                     <td className="nowrap">{won(item.total)}</td>
                     <td className="nowrap">{won(item.unpaid)}</td>

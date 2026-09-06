@@ -342,6 +342,15 @@ th, td {
   overflow-wrap: break-word;
 }
 
+.budget-paid-row td {
+  color: var(--text-muted);
+}
+
+.budget-paid-row td:first-child,
+.budget-paid-row td:nth-child(2) {
+  text-decoration: line-through;
+}
+
 .info-table th {
   width: 140px;
   color: var(--text-muted);
