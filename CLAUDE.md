@@ -62,6 +62,8 @@ create policy "anon delete" on checklist_items for delete to anon, authenticated
 ```
 - `end`는 FullCalendar 규칙대로 "포함하지 않는" 다음 날짜다. 하루짜리 일정이면 `end`를 아예 생략한다.
 - `title`은 달력 칸에 들어갈 짧은 이름, `description`은 클릭했을 때 보여줄 전체 설명 — 체크리스트와 마찬가지로 이것도 결국 구조화된 데이터이며, 지금은 `data.js`에 정적으로 있지만 사용자가 직접 일정을 추가/수정하게 만들 때는 `checklist_items`와 같은 방식으로 Supabase 테이블(`calendar_events` 등)로 옮기고 `useChecklist`처럼 훅으로 감싼다.
+- **FullCalendar 패키지는 버전을 반드시 통일할 것.** `@fullcalendar/react`만 v7로 먼저 올라가고 `core`/`daygrid`/`interaction`은 아직 v6가 `latest`인 시기가 있어서(2026-09-06 기준), `npm install @fullcalendar/react @fullcalendar/core ...`를 버전 지정 없이 실행하면 서로 다른 메이저 버전이 섞여 설치되어 캘린더가 마운트 중 조용히 깨지고(에러 로그도 없이) 해당 탭이 빈 화면으로 보인다. `package.json`에 네 패키지 모두 정확히 같은 버전(현재 `6.1.21`)으로 고정되어 있다 — 업그레이드할 땐 네 패키지를 항상 같이, 같은 버전으로 올린다.
+- 일정 상태(종료/진행중/예정) 배지는 `src/components/EventStatusBadge.jsx`의 공용 컴포넌트로 관리한다. 오늘 날짜와 이벤트의 start/end를 비교해 상태를 자동 계산하므로(`getEventStatus`), 도메인 쪽에서 상태를 직접 하드코딩하지 않는다. 색상/라벨 체계는 Figma "삼성물산 시니어 리빙 솔루션 리빙매니저" 캘린더 컴포넌트(BadgeCalendar24)를 참고함 — 종료 #888, 진행중 #7b53ea, 예정 #ff863b.
 
 ## Supabase 스키마 변경 자동화 — Management API
 스키마(테이블/정책 등)를 바꿔야 할 때, 매번 사용자에게 SQL Editor에서 직접 실행해달라고 부탁할 필요 없다. `.env`(gitignore 처리, 커밋 안 됨)에 `SUPABASE_PROJECT_REF`와 `SUPABASE_MANAGEMENT_TOKEN`이 들어있으면, 아래처럼 Management API로 Claude가 직접 SQL을 실행할 수 있다:

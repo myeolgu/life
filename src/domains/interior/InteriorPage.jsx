@@ -4,6 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { property, scope, events, contractChecklist, progress } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
+import EventStatusBadge, { getEventStatus } from "../../components/EventStatusBadge";
 
 const TABS = [
   { key: "progress", label: "진행 상황" },
@@ -113,11 +114,24 @@ function Timeline() {
           headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
           events={events}
           eventClick={(info) => setSelectedId(info.event.id)}
+          eventContent={(arg) => {
+            const ev = events.find((e) => e.id === arg.event.id);
+            const status = getEventStatus(ev);
+            return (
+              <div className={`cal-event status-${status}`}>
+                <EventStatusBadge status={status} />
+                <span className="cal-event-title">{arg.event.title}</span>
+              </div>
+            );
+          }}
         />
       </div>
       {selected && (
         <div className="event-detail">
-          <div className="event-detail-date">{formatRange(selected)}</div>
+          <div className="event-detail-top">
+            <EventStatusBadge status={getEventStatus(selected)} />
+            <span className="event-detail-date">{formatRange(selected)}</span>
+          </div>
           <h3>{selected.title}</h3>
           <p>{selected.description}</p>
         </div>
