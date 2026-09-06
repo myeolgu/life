@@ -344,6 +344,10 @@ th, td {
   background: #ffffff;
 }
 
+.calendar-wrap .fc-col-header {
+  margin-bottom: 0;
+}
+
 .calendar-wrap .fc-scrollgrid,
 .calendar-wrap .fc-scrollgrid-sync-table,
 .calendar-wrap table {
