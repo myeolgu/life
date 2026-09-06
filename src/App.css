@@ -100,8 +100,8 @@
   transform: translateY(-2px);
 }
 
-.category-emoji {
-  font-size: 2rem;
+.category-icon {
+  color: var(--accent);
 }
 
 .category-title {
@@ -292,9 +292,17 @@ th, td {
 }
 
 .card .action {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   font-weight: 600;
   color: var(--accent);
   margin-bottom: 0;
+}
+
+.card .action svg {
+  flex-shrink: 0;
+  margin-top: 3px;
 }
 
 .verify-badge {
@@ -348,13 +356,17 @@ th, td {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
   margin: 2px;
+  padding: 0;
   border: 2px solid var(--accent);
   border-radius: 50%;
   color: var(--accent);
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .calendar-wrap .fc-col-header {

@@ -17,6 +17,7 @@ import EventStatusBadge, { getEventStatus } from "../../components/EventStatusBa
 import ErrorBoundary from "../../components/ErrorBoundary";
 import Modal from "../../components/Modal";
 import Accordion from "../../components/Accordion";
+import { PixelArrowIcon } from "../../components/PixelIcons";
 
 const TABS = [
   { key: "progress", label: "진행 상황" },
@@ -224,7 +225,9 @@ function ContractChecklist() {
           <div className="card" key={c.no}>
             <h3>{c.no}. {c.phrase}</h3>
             <p>{c.explain}</p>
-            <p className="action">👉 {c.action}</p>
+            <p className="action">
+              <PixelArrowIcon size={14} /> {c.action}
+            </p>
           </div>
         ))}
       </div>
