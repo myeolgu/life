@@ -18,7 +18,7 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 - `src/App.jsx` — 최상위 라우터. `view` 상태(`home`/`interior`/`loan`/...)로 홈 화면과 각 도메인 페이지를 전환한다. 새 도메인을 추가하면 여기에 분기를 추가.
 - `src/Home.jsx` — 홈 화면. 카테고리 카드(인테리어, 대출...)를 눌러 도메인으로 진입하고, 하단에 `HomeCalendar`로 전체 도메인 일정을 모아 보여준다.
 - `src/allEvents.js` — 각 도메인의 `events` 배열을 모아 홈 캘린더에서 쓰는 통합 목록. 새 도메인에 날짜 있는 일정이 생기면 여기 `domainMeta`에 색상/이름을 등록하고 `allEvents`에 합쳐준다.
-- `src/components/` — 도메인에 종속되지 않는 공용 컴포넌트. `EventStatusBadge`(종료/진행중/예정 배지, 오늘 날짜 기준 자동 계산), `HomeCalendar`(홈 화면 통합 캘린더), `ErrorBoundary`(탭/섹션 단위 에러 격리 — 하나가 깨져도 앱 전체가 하얗게 안 되게 함. 새 탭/섹션을 추가할 때는 항상 이걸로 감싼다).
+- `src/components/` — 도메인에 종속되지 않는 공용 컴포넌트. `EventStatusBadge`(종료/진행중/예정 배지, 오늘 날짜 기준 자동 계산), `HomeCalendar`(홈 화면 통합 캘린더 — 이벤트 색은 도메인이 아니라 **상태(종료/진행중/예정) 기준**이고, 도메인 구분은 작은 점만 씀), `AddEventForm`(캘린더 "+ 일정 추가" 버튼으로 여는 일정 추가 폼), `Modal`(팝업 — 캘린더 일정 상세/추가 폼 등에 사용), `ErrorBoundary`(탭/섹션 단위 에러 격리 — 하나가 깨져도 앱 전체가 하얗게 안 되게 함. 새 탭/섹션을 추가할 때는 항상 이걸로 감싼다).
 - `src/domains/<도메인>/` — 도메인별 폴더. 각 도메인은 `data.js`(콘텐츠/체크리스트 시드 데이터)와 `<Domain>Page.jsx`(그 도메인 안의 탭/섹션 UI)로 구성된다.
   - `src/domains/interior/` — 인테리어 도메인 (매물정보/시공범위/공사순서(캘린더)/계약체크리스트/진행상황)
   - `src/domains/loan/` — 대출/혼인신고 도메인 (자금계획/진행상황)
@@ -94,7 +94,7 @@ create table calendar_events (
 ```
 - `end`는 FullCalendar 규칙대로 "포함하지 않는" 다음 날짜다. 하루짜리 일정이면 `end`를 아예 생략한다.
 - `title`은 달력 칸에 들어갈 짧은 이름, `description`은 클릭했을 때 보여줄 전체 설명.
-- 홈 화면 통합 캘린더(`src/allEvents.js`의 `useAllEvents`)는 각 도메인의 `useCalendarEvents` 결과를 합쳐서 보여준다 — 새 도메인에 일정이 생기면 여기에도 추가한다.
+- 홈 화면 통합 캘린더(`src/allEvents.js`의 `useAllEvents`)는 각 도메인의 `useCalendarEvents` 결과를 합쳐서 보여준다 — 새 도메인에 일정이 생기면 여기에도 추가한다. **일정 색상은 도메인이 아니라 상태(`getEventStatus`) 기준**으로 칠한다 — 도메인은 작은 점(`legend-dot`)으로만 구분한다 (한 달에 한 도메인 일정만 있으면 전부 같은 색으로 보여서 헷갈린다는 피드백을 받아 2026-09-06에 고침). `useAllEvents`가 돌려주는 `addEvent(domain, event)`로 캘린더 헤더의 "+ 일정 추가" 커스텀 버튼(`customButtons`, `AddEventForm` 모달)에서 새 일정을 바로 추가할 수 있다 — 폼의 "종료일"은 사용자에게는 포함(inclusive)으로 보여주고, 저장 직전에 FullCalendar 규칙(미포함 다음날)으로 변환한다(`toExclusiveEnd`).
 - **FullCalendar 패키지는 버전을 반드시 통일할 것.** `@fullcalendar/react`만 v7로 먼저 올라가고 `core`/`daygrid`/`interaction`은 아직 v6가 `latest`인 시기가 있어서(2026-09-06 기준), `npm install @fullcalendar/react @fullcalendar/core ...`를 버전 지정 없이 실행하면 서로 다른 메이저 버전이 섞여 설치되어 캘린더가 마운트 중 조용히 깨지고(에러 로그도 없이) 해당 탭이 빈 화면으로 보인다. `package.json`에 네 패키지 모두 정확히 같은 버전(현재 `6.1.21`)으로 고정되어 있다 — 업그레이드할 땐 네 패키지를 항상 같이, 같은 버전으로 올린다.
 - 일정 상태(종료/진행중/예정) 배지는 `src/components/EventStatusBadge.jsx`의 공용 컴포넌트로 관리한다. 오늘 날짜와 이벤트의 start/end를 비교해 상태를 자동 계산하므로(`getEventStatus`), 도메인 쪽에서 상태를 직접 하드코딩하지 않는다. 색상/라벨 체계는 Figma "삼성물산 시니어 리빙 솔루션 리빙매니저" 캘린더 컴포넌트(BadgeCalendar24)를 참고함 — 종료 #888, 진행중 #7b53ea, 예정 #ff863b.
 

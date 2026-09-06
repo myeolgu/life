@@ -9,15 +9,23 @@ export const domainMeta = {
 };
 
 /**
- * 모든 도메인의 캘린더 이벤트(Supabase calendar_events 테이블)를 합쳐서 반환한다.
+ * 모든 도메인의 캘린더 이벤트(Supabase calendar_events 테이블)를 합쳐서 반환하고,
+ * 새 일정을 원하는 도메인에 추가하는 함수도 같이 내려준다.
  * 새 도메인에 날짜 있는 일정이 생기면 여기에 useCalendarEvents 호출을 추가하고 합쳐준다.
  */
 export function useAllEvents() {
-  const { events: interiorEvents } = useCalendarEvents("interior", interiorSeed);
-  const { events: loanEvents } = useCalendarEvents("loan", loanSeed);
+  const interior = useCalendarEvents("interior", interiorSeed);
+  const loan = useCalendarEvents("loan", loanSeed);
 
-  return [
-    ...interiorEvents.map((e) => ({ ...e, id: `interior:${e.id}`, domain: "interior" })),
-    ...loanEvents.map((e) => ({ ...e, id: `loan:${e.id}`, domain: "loan" })),
+  const events = [
+    ...interior.events.map((e) => ({ ...e, id: `interior:${e.id}`, domain: "interior" })),
+    ...loan.events.map((e) => ({ ...e, id: `loan:${e.id}`, domain: "loan" })),
   ];
+
+  async function addEvent(domain, event) {
+    if (domain === "interior") return interior.addEvent(event);
+    if (domain === "loan") return loan.addEvent(event);
+  }
+
+  return { events, addEvent };
 }

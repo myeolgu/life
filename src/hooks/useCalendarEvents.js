@@ -70,5 +70,23 @@ export function useCalendarEvents(domain, seedEvents) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [domain]);
 
-  return { events, loading, persistent: isSupabaseConfigured };
+  async function addEvent(newEvent) {
+    setEvents((prev) => [...prev, newEvent]);
+    if (!isSupabaseConfigured) return;
+    const { error } = await supabase.from("calendar_events").insert({
+      id: newEvent.id,
+      domain,
+      title: newEvent.title,
+      start_date: newEvent.start,
+      end_date: newEvent.end ?? null,
+      description: newEvent.description ?? "",
+      sort_order: events.length,
+    });
+    if (error) {
+      console.error("calendar_events 추가 실패:", error.message);
+      setEvents((prev) => prev.filter((e) => e.id !== newEvent.id));
+    }
+  }
+
+  return { events, loading, persistent: isSupabaseConfigured, addEvent };
 }

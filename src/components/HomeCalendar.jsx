@@ -6,6 +6,9 @@ import { useAllEvents, domainMeta } from "../allEvents";
 import EventStatusBadge, { getEventStatus } from "./EventStatusBadge";
 import ErrorBoundary from "./ErrorBoundary";
 import Modal from "./Modal";
+import AddEventForm from "./AddEventForm";
+
+const DOMAIN_OPTIONS = Object.entries(domainMeta).map(([key, meta]) => ({ key, label: meta.label }));
 
 function formatDate(iso) {
   return iso.replaceAll("-", ".");
@@ -19,20 +22,37 @@ function formatRange(ev) {
   return endIso === ev.start ? formatDate(ev.start) : `${formatDate(ev.start)} ~ ${formatDate(endIso)}`;
 }
 
+// 사용자가 입력한 "포함" 종료일을 FullCalendar/DB 규칙인 "미포함" 다음날로 변환한다.
+function toExclusiveEnd(inclusiveEnd) {
+  if (!inclusiveEnd) return undefined;
+  const d = new Date(`${inclusiveEnd}T00:00:00`);
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 function HomeCalendarInner({ onNavigate }) {
-  const allEvents = useAllEvents();
+  const { events: allEvents, addEvent } = useAllEvents();
   const [selectedId, setSelectedId] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   const selected = allEvents.find((e) => e.id === selectedId);
+
+  function handleAddEvent(domain, event) {
+    addEvent(domain, { ...event, end: toExclusiveEnd(event.end) });
+    setShowAddForm(false);
+  }
 
   return (
     <section className="home-calendar">
       <h2>전체 일정</h2>
-      <p className="muted">모든 카테고리의 일정을 한눈에 봅니다. 날짜를 클릭하면 상세 내용이 팝업으로 나옵니다.</p>
+      <p className="muted">
+        모든 카테고리의 일정을 한눈에 봅니다. 색은 진행 상태(종료/진행중/예정) 기준이고, 작은 점은 카테고리입니다.
+        날짜를 클릭하면 상세 내용이 팝업으로 나옵니다.
+      </p>
       <div className="calendar-legend">
-        {Object.entries(domainMeta).map(([key, meta]) => (
-          <span key={key} className="legend-item">
-            <span className="legend-dot" style={{ background: meta.color }} />
-            {meta.label}
+        {DOMAIN_OPTIONS.map((d) => (
+          <span key={d.key} className="legend-item">
+            <span className="legend-dot" style={{ background: domainMeta[d.key].color }} />
+            {d.label}
           </span>
         ))}
       </div>
@@ -42,21 +62,27 @@ function HomeCalendarInner({ onNavigate }) {
           initialView="dayGridMonth"
           locale="ko"
           height="auto"
-          headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+          headerToolbar={{ left: "prev,next today", center: "title", right: "addEvent" }}
+          customButtons={{
+            addEvent: { text: "+ 일정 추가", click: () => setShowAddForm(true) },
+          }}
           events={allEvents}
           eventClick={(info) => setSelectedId(info.event.id)}
           eventContent={(arg) => {
             const ev = allEvents.find((e) => e.id === arg.event.id);
+            const status = getEventStatus(ev);
             const meta = domainMeta[ev.domain];
             return (
-              <div className="cal-event home-cal-event">
+              <div className={`cal-event status-${status}`}>
                 <span className="legend-dot" style={{ background: meta.color }} />
+                <EventStatusBadge status={status} />
                 <span className="cal-event-title">{arg.event.title}</span>
               </div>
             );
           }}
         />
       </div>
+
       <Modal open={!!selected} onClose={() => setSelectedId(null)}>
         {selected && (
           <div className="event-detail">
@@ -75,6 +101,10 @@ function HomeCalendarInner({ onNavigate }) {
             )}
           </div>
         )}
+      </Modal>
+
+      <Modal open={showAddForm} onClose={() => setShowAddForm(false)}>
+        <AddEventForm domains={DOMAIN_OPTIONS} onSubmit={handleAddEvent} onCancel={() => setShowAddForm(false)} />
       </Modal>
     </section>
   );
