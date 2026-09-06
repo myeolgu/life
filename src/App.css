@@ -366,6 +366,16 @@ th, td {
   gap: 8px;
 }
 
+.calendar-wrap th.fc-day-sun .fc-col-header-cell-cushion,
+.calendar-wrap td.fc-day-sun .fc-daygrid-day-number {
+  color: #f65353;
+}
+
+.calendar-wrap th.fc-day-sat .fc-col-header-cell-cushion,
+.calendar-wrap td.fc-day-sat .fc-daygrid-day-number {
+  color: #5b7df0;
+}
+
 .calendar-wrap .fc-toolbar-chunk:first-child {
   justify-self: start;
 }
