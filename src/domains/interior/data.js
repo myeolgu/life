@@ -96,16 +96,6 @@ export const contractors = [
   },
   {
     no: 2,
-    name: "데코크로스 디자인",
-    address: "경기도 부천시 원미구 상동로117번길 31 대림타운 3층 305호",
-    distance: "부천시 원미구 상동 — 인천 부평구와는 다른 시(市)지만 인접, 5곳 중 가장 멂",
-    contact: "확인 안 됨",
-    note: "사용자가 직접 확인한 주소 (2026-09-06). 이전에 찾았던 '2017년 폐업' 사업자등록 정보는 인천 계양구 주소로 나와서 이 주소와 안 맞음 — 다른 업체였을 가능성이 높지만, 그래도 상담 시 정상 영업 여부는 확인할 것.",
-    portfolioUrl: "https://ozip.me/8hoWCt3",
-    verified: true,
-  },
-  {
-    no: 3,
     name: "(주)디자인큐원",
     address: "인천광역시 부평구 원적로421번길 3 (산곡동)",
     distance: "부개주공1단지와 같은 부평구 산곡동 — 가까운 편",
@@ -115,7 +105,7 @@ export const contractors = [
     verified: true,
   },
   {
-    no: 4,
+    no: 3,
     name: "홈프렌드",
     address: "인천광역시 부평구 주부토로146번길 13-3 (갈산동)",
     distance: "부개주공1단지와 같은 부평구 갈산동 — 가까운 편",
@@ -125,10 +115,10 @@ export const contractors = [
     verified: true,
   },
   {
-    no: 5,
+    no: 4,
     name: "미송디자인",
     address: "인천광역시 부평구 부개동 23-18",
-    distance: "부개주공1단지와 같은 부개동 — 6곳 중 가장 가까움",
+    distance: "부개주공1단지와 같은 부개동 — 4곳 중 가장 가까움",
     contact: "확인 안 됨",
     note: "사용자가 직접 확인한 주소 (2026-09-06).",
     portfolioUrl: "https://ozip.me/DlE2EdA",
