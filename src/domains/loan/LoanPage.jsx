@@ -33,7 +33,7 @@ function Progress() {
   );
 }
 
-const GROUP_ORDER = ["공통", "남편", "아내"];
+const GROUP_ORDER = ["남편", "아내"];
 
 function groupItems(items) {
   const groups = {};
@@ -78,7 +78,7 @@ function Finance() {
         필요 서류 체크리스트
         {!persistent && <span className="muted"> (Supabase 미설정: 저장 안 됨)</span>}
       </h3>
-      <p className="muted">공통 서류는 한 부만, 남편·아내 서류는 각자 본인 것을 준비합니다.</p>
+      <p className="muted">부부 공동 서류(매매계약서 사본, 등기부등본 등)도 각자 본인 몫으로 1부씩 준비합니다. 괄호 안은 발급 유효기간/권장 발급 시점입니다.</p>
       {groupItems(items).map(({ key, items: groupList }) => {
         const doneCount = groupList.filter((d) => d.done).length;
         return (
