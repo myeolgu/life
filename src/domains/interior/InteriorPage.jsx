@@ -22,6 +22,7 @@ import EventStatusBadge, { getEventStatus } from "../../components/EventStatusBa
 import ErrorBoundary from "../../components/ErrorBoundary";
 import Modal from "../../components/Modal";
 import Accordion from "../../components/Accordion";
+import ProgressRing from "../../components/ProgressRing";
 const arrowIconSrc = `${import.meta.env.BASE_URL}icons/pixel/arrow.png`;
 
 const TABS = [
@@ -224,33 +225,6 @@ function phaseProgressPct(start, end, today = new Date()) {
   return Math.round(((t - s) / (e - s)) * 100);
 }
 
-function PhaseProgressRing({ start, end }) {
-  const pct = phaseProgressPct(start, end);
-  const r = 20;
-  const c = 2 * Math.PI * r;
-  const offset = c - (pct / 100) * c;
-  return (
-    <svg width="56" height="56" viewBox="0 0 56 56" className="phase-ring" aria-label={`${pct}% 진행`}>
-      <circle cx="28" cy="28" r={r} fill="none" stroke="var(--border)" strokeWidth="6" />
-      <circle
-        cx="28"
-        cy="28"
-        r={r}
-        fill="none"
-        stroke="var(--accent)"
-        strokeWidth="6"
-        strokeDasharray={c}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        transform="rotate(-90 28 28)"
-      />
-      <text x="28" y="32" textAnchor="middle" fontSize="12" fontWeight="700" fill="var(--text)">
-        {pct}%
-      </text>
-    </svg>
-  );
-}
-
 function PhaseCard({ phase }) {
   return (
     <div className="phase-card">
@@ -259,7 +233,7 @@ function PhaseCard({ phase }) {
           <h4>{phase.title}</h4>
           <p className="muted" style={{ margin: 0 }}>{formatDate(phase.start)} ~ {formatDate(phase.end)}</p>
         </div>
-        <PhaseProgressRing start={phase.start} end={phase.end} />
+        <ProgressRing pct={phaseProgressPct(phase.start, phase.end)} />
       </div>
       <div className="phase-section">
         <b>주요 작업</b>

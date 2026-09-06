@@ -1,4 +1,5 @@
 import HomeCalendar from "./components/HomeCalendar";
+import ProgressRing from "./components/ProgressRing";
 import { useChecklist } from "./hooks/useChecklist";
 import { useAllEvents, domainMeta } from "./allEvents";
 import { getEventStatus } from "./components/EventStatusBadge";
@@ -11,16 +12,12 @@ const CATEGORIES = [
     icon: `${import.meta.env.BASE_URL}icons/pixel/house.png`,
     title: "인테리어",
     desc: "부개주공1단지 107동 1001호",
-    progressDomain: "interior_progress",
-    progressSeed: interiorProgressSeed,
   },
   {
     key: "loan",
     icon: `${import.meta.env.BASE_URL}icons/pixel/heart.png`,
     title: "대출 / 혼인신고",
     desc: "신혼부부 디딤돌대출 & 혼인신고",
-    progressDomain: "loan_progress",
-    progressSeed: loanProgressSeed,
   },
 ];
 
@@ -44,10 +41,7 @@ function formatShortDate(iso) {
   return `${parseInt(m, 10)}/${parseInt(d, 10)}`;
 }
 
-function CategoryCard({ category, events, onSelect }) {
-  const { items } = useChecklist(category.progressDomain, category.progressSeed);
-  const doneCount = items.filter((i) => i.done).length;
-  const total = items.length;
+function CategoryCard({ category, doneCount, total, events, onSelect }) {
   const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
   const status = projectStatus(doneCount, total);
   const milestone = nextMilestone(events, category.key);
@@ -79,17 +73,110 @@ function CategoryCard({ category, events, onSelect }) {
   );
 }
 
+function ProgressSummary({ domainStats, events }) {
+  const avgPct = Math.round(domainStats.reduce((sum, d) => sum + d.pct, 0) / domainStats.length);
+
+  const upcoming = events
+    .filter((e) => getEventStatus(e) !== "end")
+    .sort((a, b) => a.start.localeCompare(b.start))
+    .slice(0, 3);
+
+  const recentDone = domainStats
+    .flatMap((d) => d.items.filter((i) => i.done && i.updatedAt).map((i) => ({ ...i, domain: d.key })))
+    .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
+    .slice(0, 3);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const soon = events.filter((e) => {
+    if (getEventStatus(e) === "end") return false;
+    const start = new Date(`${e.start}T00:00:00`);
+    const diffDays = Math.round((start - today) / 86400000);
+    return diffDays >= 0 && diffDays <= 7;
+  });
+
+  return (
+    <section className="progress-summary">
+      <h2>한눈에 보는 진행 현황</h2>
+      <div className="progress-summary-grid">
+        <div className="summary-card summary-card-donut">
+          <ProgressRing pct={avgPct} size={84} stroke={9} />
+          <span className="muted" style={{ margin: 0 }}>전체 평균 진행률</span>
+        </div>
+
+        <div className="summary-card">
+          <h4>다음 마일스톤</h4>
+          {upcoming.length === 0 && <p className="muted" style={{ margin: 0 }}>예정된 일정이 없습니다.</p>}
+          <ul className="summary-list">
+            {upcoming.map((e) => (
+              <li key={e.id}>
+                <span className="summary-dot" style={{ background: domainMeta[e.domain]?.color }} />
+                <span className="nowrap">{formatShortDate(e.start)}</span> {e.title}
+                <span className="muted"> · {domainMeta[e.domain]?.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="summary-card">
+          <h4>최근 업데이트</h4>
+          {recentDone.length === 0 && <p className="muted" style={{ margin: 0 }}>아직 완료 항목이 없습니다.</p>}
+          <ul className="summary-list">
+            {recentDone.map((i) => (
+              <li key={i.id}>✓ {i.label} <span className="muted">({formatShortDate(i.updatedAt.slice(0, 10))})</span></li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="summary-card">
+          <h4>주의 사항 <span className="muted">(7일 이내)</span></h4>
+          {soon.length === 0 && <p className="muted" style={{ margin: 0 }}>임박한 일정이 없습니다.</p>}
+          <ul className="summary-list">
+            {soon.map((e) => (
+              <li key={e.id}>
+                <span className="status-badge" style={{ background: "#e0524b" }}>D-{Math.round((new Date(`${e.start}T00:00:00`) - today) / 86400000)}</span>{" "}
+                {formatShortDate(e.start)} {e.title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home({ onSelect }) {
   const { events } = useAllEvents();
+  const interior = useChecklist("interior_progress", interiorProgressSeed);
+  const loan = useChecklist("loan_progress", loanProgressSeed);
+
+  const domainStats = [
+    { key: "interior", items: interior.items, pct: interior.items.length === 0 ? 0 : Math.round((interior.items.filter((i) => i.done).length / interior.items.length) * 100) },
+    { key: "loan", items: loan.items, pct: loan.items.length === 0 ? 0 : Math.round((loan.items.filter((i) => i.done).length / loan.items.length) * 100) },
+  ];
 
   return (
     <div className="home">
       <h1>삶 관리</h1>
       <p className="muted">관리할 카테고리를 선택하세요.</p>
+
+      <ProgressSummary domainStats={domainStats} events={events} />
+
       <div className="category-grid">
-        {CATEGORIES.map((c) => (
-          <CategoryCard key={c.key} category={c} events={events} onSelect={onSelect} />
-        ))}
+        {CATEGORIES.map((category) => {
+          const stats = domainStats.find((d) => d.key === category.key);
+          const doneCount = stats.items.filter((i) => i.done).length;
+          return (
+            <CategoryCard
+              key={category.key}
+              category={category}
+              doneCount={doneCount}
+              total={stats.items.length}
+              events={events}
+              onSelect={onSelect}
+            />
+          );
+        })}
       </div>
 
       <HomeCalendar onNavigate={onSelect} />

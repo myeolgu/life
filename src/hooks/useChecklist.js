@@ -20,7 +20,7 @@ export function useChecklist(domain, seedItems) {
     async function load() {
       const { data, error } = await supabase
         .from("checklist_items")
-        .select("id, label, done, group_label")
+        .select("id, label, done, group_label, updated_at")
         .eq("domain", domain)
         .order("sort_order", { ascending: true });
 
@@ -56,7 +56,13 @@ export function useChecklist(domain, seedItems) {
 
       if (!cancelled) {
         setItems(
-          data.map((row) => ({ id: row.id, label: row.label, done: row.done, group: row.group_label ?? undefined }))
+          data.map((row) => ({
+            id: row.id,
+            label: row.label,
+            done: row.done,
+            group: row.group_label ?? undefined,
+            updatedAt: row.updated_at,
+          }))
         );
         setLoading(false);
       }
@@ -73,14 +79,18 @@ export function useChecklist(domain, seedItems) {
     const target = items.find((item) => item.id === id);
     if (!target) return;
     const nextDone = !target.done;
+    const nextUpdatedAt = new Date().toISOString();
 
-    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, done: nextDone } : item)));
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, done: nextDone, updatedAt: nextUpdatedAt } : item)));
 
     if (!isSupabaseConfigured) return;
-    const { error } = await supabase.from("checklist_items").update({ done: nextDone }).eq("id", id);
+    const { error } = await supabase
+      .from("checklist_items")
+      .update({ done: nextDone, updated_at: nextUpdatedAt })
+      .eq("id", id);
     if (error) {
       console.error("checklist_items 업데이트 실패:", error.message);
-      setItems((prev) => prev.map((item) => (item.id === id ? { ...item, done: !nextDone } : item)));
+      setItems((prev) => prev.map((item) => (item.id === id ? { ...item, done: !nextDone, updatedAt: target.updatedAt } : item)));
     }
   }
 
