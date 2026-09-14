@@ -182,11 +182,11 @@ export const contractors = [
   {
     no: 2,
     name: "봄인테리어 (BOM Interior Design Group)",
-    address: "정확한 사무실 주소 확인 안 됨 — 블로그 기준 서비스 지역은 '인천, 인접 서울·경기'",
-    distance: "확인 안 됨 (서비스 지역만 확인됨)",
+    address: "인천광역시 부평구 부개로 10 (부개동, GS수퍼마켓)",
+    distance: "부개주공1단지와 같은 부개동 — 가까운 편",
     contact: "032-519-8787 / 010-9229-8787 (카카오톡: 봄인테리어)",
-    note: "소윤님 추천 (2026-09-14, blog.naver.com/bominterior 블로그 캡처로 확인). 실내건축공사업 등록 확인됨 (kiscon.net 조회, 2026-09-14). 전화번호는 블로그 헤더에서 직접 확인함 — 정확한 사무실 주소만 아직 확인 안 됨.",
-    verified: false,
+    note: "소윤님 추천 (2026-09-14, blog.naver.com/bominterior 블로그 캡처로 확인). 실내건축공사업 등록 확인됨 (kiscon.net 조회, 2026-09-14). 전화번호·주소 모두 블로그에서 직접 확인함 — 정확한 지도 좌표는 미확보라 위치 비교 지도에는 아직 표시 안 됨.",
+    verified: true,
   },
   {
     no: 3,
