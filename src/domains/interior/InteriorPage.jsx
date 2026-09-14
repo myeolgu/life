@@ -283,10 +283,11 @@ function Timeline() {
 // 2026-09-06 기준 OpenStreetMap(Nominatim) 도로명주소 기준 지오코딩 좌표 — 건물 정확 위치가 아니라
 // 도로 단위 근사치다 (한국 건물 단위 주소는 OSM 커버리지가 낮음). "직관적 거리 비교" 목적으로는 충분.
 const APARTMENT_LOCATION = { lat: 37.5041112, lng: 126.7329245, label: "부개주공1단지 (길주남로 143 기준)" };
-// 2026-09-14: 봄인테리어·데코크로스디자인은 정확한 주소를 아직 확인 못해서 좌표 없음 —
-// 지도에는 좌표가 있는 후보만 표시된다(ContractorsMap의 필터 로직 참고).
+// 좌표는 OpenStreetMap Nominatim으로 주소 지오코딩해서 구함 (2026-09-14).
 const CONTRACTOR_LOCATIONS = {
   1: { lat: 37.5042615, lng: 126.7128978 },
+  2: { lat: 37.4981899, lng: 126.7397386 }, // 봄인테리어 (GS수퍼마켓 인천부개점 기준)
+  3: { lat: 37.5075993, lng: 126.7516984 }, // 데코크로스디자인 (대림타운, 부천 상동)
 };
 
 function createPinIcon({ text, bg, size }) {
@@ -372,8 +373,8 @@ function Contractors() {
         ))}
       </div>
 
-      <h3>위치 비교 (★ 부개주공1단지 · 업체)</h3>
-      <p className="muted">지도 위 숫자 핀이 각 업체 위치입니다 (주소 확인된 업체만 표시). 위 카드 번호와 동일합니다.</p>
+      <h3>위치 비교 (★ 부개주공1단지 · 1~3 업체)</h3>
+      <p className="muted">지도 위 숫자 핀이 각 업체 위치입니다. 위 카드 번호와 동일합니다.</p>
       <ContractorsMap contractors={contractors} />
 
       <p className="callout">
