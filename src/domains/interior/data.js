@@ -181,11 +181,11 @@ export const contractors = [
   },
   {
     no: 2,
-    name: "봄인테리어",
-    address: "확인 안 됨 — 인스타그램(@bominterior1) 기준 부천/인천 권역에서 영업",
-    distance: "확인 안 됨",
-    contact: "확인 안 됨",
-    note: "소윤님 추천 (2026-09-14, 네이버 지도/블로그 링크로 공유받음 — blog.naver.com/bominterior). 실내건축공사업 등록 확인됨 (kiscon.net 조회, 2026-09-14) — 다만 정확한 주소·연락처는 아직 확인 안 됨, 상담 잡기 전 확인 필요.",
+    name: "봄인테리어 (BOM Interior Design Group)",
+    address: "정확한 사무실 주소 확인 안 됨 — 블로그 기준 서비스 지역은 '인천, 인접 서울·경기'",
+    distance: "확인 안 됨 (서비스 지역만 확인됨)",
+    contact: "032-519-8787 / 010-9229-8787 (카카오톡: 봄인테리어)",
+    note: "소윤님 추천 (2026-09-14, blog.naver.com/bominterior 블로그 캡처로 확인). 실내건축공사업 등록 확인됨 (kiscon.net 조회, 2026-09-14). 전화번호는 블로그 헤더에서 직접 확인함 — 정확한 사무실 주소만 아직 확인 안 됨.",
     verified: false,
   },
   {
