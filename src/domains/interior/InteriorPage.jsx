@@ -304,12 +304,18 @@ const contractorIcon = (no) => createPinIcon({ text: String(no), bg: "#5b3a24", 
 
 function FitToMarkers({ points }) {
   const map = useMap();
+  // key로 points 내용을 비교해서, 탭 전환 직후처럼 컨테이너가 아직 최종 크기로 자리잡기 전에
+  // fitBounds가 실행돼 좁은 화면(모바일)에서 일부 핀이 범위 밖으로 밀려나는 문제가 있었다
+  // (2026-09-14, 화면비율이 다른 모바일 폭에서 재현 확인). invalidateSize로 실제 렌더링된
+  // 컨테이너 크기를 다시 측정한 뒤 fitBounds를 호출하도록 수정.
+  const key = points.map((p) => p.join(",")).join("|");
   useEffect(() => {
     if (points.length > 0) {
+      map.invalidateSize();
       map.fitBounds(points, { padding: [24, 24], maxZoom: 15 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map]);
+  }, [map, key]);
   return null;
 }
 
