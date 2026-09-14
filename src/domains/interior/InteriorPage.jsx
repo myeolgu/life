@@ -282,7 +282,10 @@ function Timeline() {
 
 // 2026-09-06 기준 OpenStreetMap(Nominatim) 도로명주소 기준 지오코딩 좌표 — 건물 정확 위치가 아니라
 // 도로 단위 근사치다 (한국 건물 단위 주소는 OSM 커버리지가 낮음). "직관적 거리 비교" 목적으로는 충분.
-const APARTMENT_LOCATION = { lat: 37.5041112, lng: 126.7329245, label: "부개주공1단지 (길주남로 143 기준)" };
+// 2026-09-14 재검증: 기존 좌표(37.5041112, 126.7329245)는 Nominatim에서 "부평동"으로
+// 라벨링된 지점이었는데, 구조화 쿼리(street+housenumber)로 다시 조회하니 "부개동"으로 명시
+// 라벨링된 지점이 별도로 있었다 (약 0.5km 차이) — 부개주공1단지는 부개동 소재이므로 이쪽이 맞음.
+const APARTMENT_LOCATION = { lat: 37.5038196, lng: 126.7389088, label: "부개주공1단지 (길주남로 143, 부개동 확인)" };
 // 좌표는 OpenStreetMap Nominatim으로 주소 지오코딩해서 구함 (2026-09-14).
 const CONTRACTOR_LOCATIONS = {
   1: { lat: 37.5042615, lng: 126.7128978 },
