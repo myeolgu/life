@@ -77,6 +77,8 @@ function PropertyInfo() {
           <tr><th>단지 규모</th><td>{property.complex}</td></tr>
           <tr><th>평형</th><td>{property.pyeong}</td></tr>
           <tr><th>평면도</th><td>{property.floorPlan}</td></tr>
+          {property.concept && <tr><th>선호 컨셉</th><td>{property.concept}</td></tr>}
+          {property.lifestyleNotes && <tr><th>생활 특이사항</th><td>{property.lifestyleNotes}</td></tr>}
         </tbody>
       </table>
     </section>

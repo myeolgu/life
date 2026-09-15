@@ -971,3 +971,9 @@ th, td {
   background: var(--bg);
   color: var(--text-muted);
 }
+
+/* 2026-09-15: .card 배경색이 .btn-secondary 배경(var(--bg))이랑 똑같아서 카드 안에서는
+   버튼이 안 보이고 흐린 텍스트처럼 보이던 문제 — 카드 안에서만 테두리를 줘서 구분되게 함. */
+.card .btn-secondary {
+  border: 1px solid var(--border);
+}
