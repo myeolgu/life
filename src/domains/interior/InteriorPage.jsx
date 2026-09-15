@@ -349,14 +349,63 @@ function ContractorsMap({ contractors }) {
   );
 }
 
+// 2026-09-15: 업체별로 상담/견적 체크리스트를 따로 관리하고 싶다는 요청 반영 —
+// 계약/견적 체크리스트 탭에 있던 18개 체크 항목(견적서 검토/계약서 검토)을 업체 카드에서
+// 팝업으로 열리는 업체별 체크리스트로 옮겼다. 같은 checklist_items 도메인("interior_contract_review")
+// 안에서 id 뒤에 ":업체no"를 붙여 업체별로 완전히 독립된 54개(18×3) 행으로 저장한다
+// (checklist_items의 PK가 도메인이 아니라 id 단독이라 이렇게 구분해야 서로 안 겹친다).
+function reviewSeedForContractor(no) {
+  return contractReviewSeed.map((item) => ({ ...item, id: `${item.id}:${no}` }));
+}
+const allContractorReviewSeed = [1, 2, 3].flatMap(reviewSeedForContractor);
+
+function ContractorChecklistModal({ contractor, onClose }) {
+  const { items, toggle, persistent } = useChecklist("interior_contract_review", allContractorReviewSeed);
+  const items_ = items.filter((i) => i.id.endsWith(`:${contractor?.no}`));
+  const doneCount = items_.filter((i) => i.done).length;
+
+  return (
+    <Modal open={!!contractor} onClose={onClose}>
+      {contractor && (
+        <div>
+          <h3 style={{ marginTop: 0 }}>{contractor.no}. {contractor.name} — 상담·계약 체크리스트</h3>
+          <p className="muted">
+            {doneCount} / {items_.length} 완료
+            {!persistent && " — Supabase 미설정: 저장 안 됨"}
+          </p>
+          {groupReviewItems(items_).map(({ key, items: groupItems }) => {
+            const groupDone = groupItems.filter((d) => d.done).length;
+            return (
+              <div className="checklist-group" key={key}>
+                <h4>{key} <span className="muted">({groupDone}/{groupItems.length})</span></h4>
+                <ul className="checklist">
+                  {groupItems.map((d) => (
+                    <li key={d.id}>
+                      <label>
+                        <input type="checkbox" checked={d.done} onChange={() => toggle(d.id)} /> {d.label}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
 function Contractors() {
   const { items: contractors } = useContentItems("interior", "contractors", contractorsSeed);
+  const [selected, setSelected] = useState(null);
 
   return (
     <section>
       <h2>시공업체 후보</h2>
       <p className="muted">
         아직 전부 상담 전입니다. 부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
+        카드의 "체크리스트 보기"를 누르면 그 업체 전용 상담·계약 체크리스트를 확인/체크할 수 있습니다.
       </p>
       <div className="card-grid">
         {contractors.map((c) => (
@@ -378,6 +427,9 @@ function Contractors() {
                 오늘의집 포트폴리오 보기 →
               </a>
             )}
+            <button className="btn-secondary" style={{ marginTop: 10 }} onClick={() => setSelected(c)}>
+              체크리스트 보기
+            </button>
           </div>
         ))}
       </div>
@@ -389,6 +441,8 @@ function Contractors() {
       <p className="callout">
         상담 전에 계약/견적 체크리스트 탭의 "업체 말장난 TOP5"를 다시 한 번 확인할 것.
       </p>
+
+      <ContractorChecklistModal contractor={selected} onClose={() => setSelected(null)} />
     </section>
   );
 }
@@ -405,7 +459,6 @@ function groupReviewItems(items) {
 
 function ContractChecklist() {
   const { items: contractChecklist } = useContentItems("interior", "contract_checklist", contractChecklistSeed);
-  const { items: reviewItems, toggle, persistent } = useChecklist("interior_contract_review", contractReviewSeed);
 
   return (
     <section>
@@ -428,28 +481,11 @@ function ContractChecklist() {
         핵심: 인테리어의 성패는 디자인이 아니라 계약서에서 90% 이상 결정된다.
       </p>
 
-      <h3>
-        상담·계약 자리 체크리스트
-        {!persistent && <span className="muted"> (Supabase 미설정: 저장 안 됨)</span>}
-      </h3>
-      <p className="muted">괄호 안은 확인 방법·주의할 점입니다. 실제 상담/계약 전에 하나씩 체크하세요.</p>
-      {groupReviewItems(reviewItems).map(({ key, items }) => {
-        const doneCount = items.filter((d) => d.done).length;
-        return (
-          <div className="checklist-group" key={key}>
-            <h4>{key} <span className="muted">({doneCount}/{items.length})</span></h4>
-            <ul className="checklist">
-              {items.map((d) => (
-                <li key={d.id}>
-                  <label>
-                    <input type="checkbox" checked={d.done} onChange={() => toggle(d.id)} /> {d.label}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
+      <p className="callout">
+        실제 체크(견적서 검토/계약서 검토 18개 항목)는 여기서 하지 않는다 — "시공업체" 탭에서 업체
+        카드의 "체크리스트 보기"를 누르면 그 업체 전용 체크리스트가 팝업으로 뜬다 (2026-09-15,
+        업체별로 따로 관리하고 싶다는 요청 반영 — 3곳 상담 결과가 서로 안 섞이도록).
+      </p>
     </section>
   );
 }
