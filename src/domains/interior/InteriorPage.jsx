@@ -359,40 +359,40 @@ function reviewSeedForContractor(no) {
 }
 const allContractorReviewSeed = [1, 2, 3].flatMap(reviewSeedForContractor);
 
-function ContractorChecklistModal({ contractor, onClose }) {
+// 2026-09-15: 처음엔 팝업(모달)으로 만들었는데 폭이 너무 좁다는 피드백을 받아 전용 페이지
+// 형태로 변경 — 업체 카드 목록 대신 이 화면 전체를 체크리스트로 바꿔서 보여주고, 상단
+// "← 목록으로"로 돌아간다.
+function ContractorChecklistPage({ contractor, onBack }) {
   const { items, toggle, persistent } = useChecklist("interior_contract_review", allContractorReviewSeed);
-  const items_ = items.filter((i) => i.id.endsWith(`:${contractor?.no}`));
+  const items_ = items.filter((i) => i.id.endsWith(`:${contractor.no}`));
   const doneCount = items_.filter((i) => i.done).length;
 
   return (
-    <Modal open={!!contractor} onClose={onClose}>
-      {contractor && (
-        <div>
-          <h3 style={{ marginTop: 0 }}>{contractor.no}. {contractor.name} — 상담·계약 체크리스트</h3>
-          <p className="muted">
-            {doneCount} / {items_.length} 완료
-            {!persistent && " — Supabase 미설정: 저장 안 됨"}
-          </p>
-          {groupReviewItems(items_).map(({ key, items: groupItems }) => {
-            const groupDone = groupItems.filter((d) => d.done).length;
-            return (
-              <div className="checklist-group" key={key}>
-                <h4>{key} <span className="muted">({groupDone}/{groupItems.length})</span></h4>
-                <ul className="checklist">
-                  {groupItems.map((d) => (
-                    <li key={d.id}>
-                      <label>
-                        <input type="checkbox" checked={d.done} onChange={() => toggle(d.id)} /> {d.label}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Modal>
+    <section>
+      <button className="back-link" onClick={onBack}>← 목록으로</button>
+      <h2>{contractor.no}. {contractor.name} — 상담·계약 체크리스트</h2>
+      <p className="muted">
+        {doneCount} / {items_.length} 완료
+        {!persistent && " — Supabase 미설정: 저장 안 됨"}
+      </p>
+      {groupReviewItems(items_).map(({ key, items: groupItems }) => {
+        const groupDone = groupItems.filter((d) => d.done).length;
+        return (
+          <div className="checklist-group" key={key}>
+            <h4>{key} <span className="muted">({groupDone}/{groupItems.length})</span></h4>
+            <ul className="checklist">
+              {groupItems.map((d) => (
+                <li key={d.id}>
+                  <label>
+                    <input type="checkbox" checked={d.done} onChange={() => toggle(d.id)} /> {d.label}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </section>
   );
 }
 
@@ -400,12 +400,16 @@ function Contractors() {
   const { items: contractors } = useContentItems("interior", "contractors", contractorsSeed);
   const [selected, setSelected] = useState(null);
 
+  if (selected) {
+    return <ContractorChecklistPage contractor={selected} onBack={() => setSelected(null)} />;
+  }
+
   return (
     <section>
       <h2>시공업체 후보</h2>
       <p className="muted">
         아직 전부 상담 전입니다. 부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
-        카드의 "체크리스트 보기"를 누르면 그 업체 전용 상담·계약 체크리스트를 확인/체크할 수 있습니다.
+        카드의 "체크리스트 보기"를 누르면 그 업체 전용 상담·계약 체크리스트 페이지로 이동합니다.
       </p>
       <div className="card-grid">
         {contractors.map((c) => (
@@ -441,8 +445,6 @@ function Contractors() {
       <p className="callout">
         상담 전에 계약/견적 체크리스트 탭의 "업체 말장난 TOP5"를 다시 한 번 확인할 것.
       </p>
-
-      <ContractorChecklistModal contractor={selected} onClose={() => setSelected(null)} />
     </section>
   );
 }
