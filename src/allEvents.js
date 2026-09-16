@@ -5,7 +5,7 @@ import { useCalendarEvents } from "./hooks/useCalendarEvents";
 
 // 홈 화면 캘린더에서 도메인을 구분하는 색상/이름 (순수 UI 메타데이터라 Supabase로 옮기지 않는다).
 export const domainMeta = {
-  interior: { label: "인테리어", color: "#b4784a" },
+  interior: { label: "인테리어", color: "#8a5c39" },
   loan: { label: "대출·혼인신고", color: "#5b7df0" },
   budget: { label: "예산 관리", color: "#3fa796" },
 };

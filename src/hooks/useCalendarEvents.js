@@ -70,9 +70,12 @@ export function useCalendarEvents(domain, seedEvents) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [domain]);
 
+  // 호출한 쪽(HomeCalendar)이 저장 성공 여부를 알아야 실패 시 사용자에게 알릴 수 있어서
+  // boolean을 반환한다 — 2026-09-16 이전엔 실패해도 콘솔에만 로그를 남기고 방금 추가한
+  // 일정을 조용히 목록에서 지워버려서, 사용자 입장에선 이유 없이 일정이 사라지는 것처럼 보였다.
   async function addEvent(newEvent) {
     setEvents((prev) => [...prev, newEvent]);
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) return true;
     const { error } = await supabase.from("calendar_events").insert({
       id: newEvent.id,
       domain,
@@ -85,7 +88,9 @@ export function useCalendarEvents(domain, seedEvents) {
     if (error) {
       console.error("calendar_events 추가 실패:", error.message);
       setEvents((prev) => prev.filter((e) => e.id !== newEvent.id));
+      return false;
     }
+    return true;
   }
 
   return { events, loading, persistent: isSupabaseConfigured, addEvent };

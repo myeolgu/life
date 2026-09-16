@@ -2,6 +2,7 @@ import { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import koLocale from "@fullcalendar/core/locales/ko";
 import { useAllEvents, domainMeta } from "../allEvents";
 import EventStatusBadge, { getEventStatus } from "./EventStatusBadge";
 import ErrorBoundary from "./ErrorBoundary";
@@ -34,11 +35,19 @@ function HomeCalendarInner({ onNavigate }) {
   const { events: allEvents, addEvent } = useAllEvents();
   const [selectedId, setSelectedId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [addError, setAddError] = useState(null);
   const selected = allEvents.find((e) => e.id === selectedId);
 
-  function handleAddEvent(domain, event) {
-    addEvent(domain, { ...event, end: toExclusiveEnd(event.end) });
-    setShowAddForm(false);
+  // 2026-09-16: 저장이 실패해도 모달을 바로 닫아버려서 방금 추가한 일정이 아무 설명 없이
+  // 사라지는 것처럼 보이던 문제 — 성공했을 때만 닫고, 실패하면 폼에 에러를 보여주고 그대로 둔다.
+  async function handleAddEvent(domain, event) {
+    setAddError(null);
+    const ok = await addEvent(domain, { ...event, end: toExclusiveEnd(event.end) });
+    if (ok) {
+      setShowAddForm(false);
+    } else {
+      setAddError("저장에 실패했습니다. 네트워크 상태를 확인하고 다시 시도해주세요.");
+    }
   }
 
   return (
@@ -61,6 +70,7 @@ function HomeCalendarInner({ onNavigate }) {
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           locale="ko"
+          locales={[koLocale]}
           height="auto"
           headerToolbar={{ left: "prev,next today", center: "title", right: "addEvent" }}
           customButtons={{
@@ -105,8 +115,13 @@ function HomeCalendarInner({ onNavigate }) {
         )}
       </Modal>
 
-      <Modal open={showAddForm} onClose={() => setShowAddForm(false)}>
-        <AddEventForm domains={DOMAIN_OPTIONS} onSubmit={handleAddEvent} onCancel={() => setShowAddForm(false)} />
+      <Modal open={showAddForm} onClose={() => { setShowAddForm(false); setAddError(null); }}>
+        <AddEventForm
+          domains={DOMAIN_OPTIONS}
+          onSubmit={handleAddEvent}
+          onCancel={() => { setShowAddForm(false); setAddError(null); }}
+          error={addError}
+        />
       </Modal>
     </section>
   );

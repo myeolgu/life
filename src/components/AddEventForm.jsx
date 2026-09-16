@@ -1,22 +1,25 @@
 import { useState } from "react";
 
-export default function AddEventForm({ domains, onSubmit, onCancel }) {
+export default function AddEventForm({ domains, onSubmit, onCancel, error }) {
   const [domain, setDomain] = useState(domains[0]?.key ?? "");
   const [title, setTitle] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!title || !start) return;
-    onSubmit(domain, {
+    setSubmitting(true);
+    await onSubmit(domain, {
       id: `custom-${Date.now()}`,
       title,
       start,
       end: end || undefined,
       description,
     });
+    setSubmitting(false);
   }
 
   return (
@@ -55,12 +58,14 @@ export default function AddEventForm({ domains, onSubmit, onCancel }) {
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
       </label>
 
+      {error && <p className="form-error">{error}</p>}
+
       <div className="add-event-actions">
-        <button type="button" className="btn-secondary" onClick={onCancel}>
+        <button type="button" className="btn-secondary" onClick={onCancel} disabled={submitting}>
           취소
         </button>
-        <button type="submit" className="btn-primary">
-          추가
+        <button type="submit" className="btn-primary" disabled={submitting}>
+          {submitting ? "저장 중..." : "추가"}
         </button>
       </div>
     </form>

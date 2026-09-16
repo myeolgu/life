@@ -36,8 +36,8 @@ const CATEGORIES = [
 // 체크리스트를 하나도 안 건드렸으면 예정, 다 끝났으면 완료, 그 사이면 진행중.
 // 색상은 EventStatusBadge와 동일한 팔레트를 재사용해 사이트 전체에서 같은 의미로 보이게 한다.
 function projectStatus(doneCount, total) {
-  if (total === 0 || doneCount === 0) return { label: "예정", bg: "#ff863b" };
-  if (doneCount >= total) return { label: "완료", bg: "#888888" };
+  if (total === 0 || doneCount === 0) return { label: "예정", bg: "#cc4e00" };
+  if (doneCount >= total) return { label: "완료", bg: "#767676" };
   return { label: "진행중", bg: "#7b53ea" };
 }
 
@@ -145,7 +145,7 @@ function ProgressSummary({ domainStats, events }) {
           <ul className="summary-list">
             {soon.map((e) => (
               <li key={e.id}>
-                <span className="status-badge" style={{ background: "#e0524b" }}>D-{Math.round((new Date(`${e.start}T00:00:00`) - today) / 86400000)}</span>{" "}
+                <span className="status-badge" style={{ background: "#db372f" }}>D-{Math.round((new Date(`${e.start}T00:00:00`) - today) / 86400000)}</span>{" "}
                 {formatShortDate(e.start)} {e.title}
               </li>
             ))}

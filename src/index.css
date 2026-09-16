@@ -4,7 +4,9 @@
   --border: #e5e1da;
   --text: #262220;
   --text-muted: #7a7369;
-  --accent: #b4784a;
+  /* 2026-09-16: 원래 #b4784a는 흰 글씨 버튼/배지 배경으로 쓰면 WCAG AA(4.5:1)를 못 채워서
+     (3.67:1) 어둡게 조정 — 같은 톤 유지하면서 흰 글씨·accent-soft 배경 위 텍스트 양쪽 다 통과. */
+  --accent: #8a5c39;
   --accent-soft: #f1e4d6;
   color-scheme: light;
 }

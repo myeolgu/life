@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import koLocale from "@fullcalendar/core/locales/ko";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -86,7 +87,8 @@ function PropertyInfo() {
 }
 
 const SPACE_ORDER = ["현관", "주방", "베란다", "욕실", "공통", "공통(전기)"];
-const PRIORITY_BADGE = { "높음": "#e0524b", "중간": "#ff863b", "낮음": "#888888" };
+// 2026-09-16: 흰 글씨 배지 배경 대비가 WCAG AA(4.5:1) 미달이라 어둡게 조정 (다른 status-badge 색과 동일 기준).
+const PRIORITY_BADGE = { "높음": "#db372f", "중간": "#cc4e00", "낮음": "#767676" };
 
 function groupBySpace(items) {
   const groups = {};
@@ -133,7 +135,7 @@ function Scope() {
                   <td>{s.item}</td>
                   <td>{s.detail}</td>
                   <td>
-                    <span className="status-badge" style={{ background: PRIORITY_BADGE[s.priority] ?? "#888888" }}>
+                    <span className="status-badge" style={{ background: PRIORITY_BADGE[s.priority] ?? "#767676" }}>
                       {s.priority}
                     </span>
                   </td>
@@ -186,6 +188,7 @@ function ConstructionCalendar() {
           initialView="dayGridMonth"
           initialDate="2026-12-12"
           locale="ko"
+          locales={[koLocale]}
           height="auto"
           headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
           events={events}
@@ -304,7 +307,7 @@ function createPinIcon({ text, bg, size }) {
   });
 }
 
-const apartmentIcon = createPinIcon({ text: "★", bg: "#b4784a", size: 26 });
+const apartmentIcon = createPinIcon({ text: "★", bg: "#8a5c39", size: 26 });
 const contractorIcon = (no) => createPinIcon({ text: String(no), bg: "#5b3a24", size: 22 });
 
 function FitToMarkers({ points }) {
