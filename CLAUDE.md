@@ -46,7 +46,11 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
 - `.github/workflows/deploy.yml` — main 브랜치 push 시 GitHub Pages 자동 배포 (Supabase 환경변수를 빌드 시 주입).
 - `vite.config.js` — `base: '/life/'` (GitHub Pages 저장소 경로와 일치, 저장소명이 바뀌면 같이 수정) + `VitePWA` 플러그인 설정(매니페스트, 아이콘, 서비스워커).
 - `src/assets/icon-source.svg` — 앱 아이콘 원본 (16x16 그리드 픽셀아트 집 모양, `shape-rendering="crispEdges"`). `public/favicon.svg`와 `public/icons/`의 PNG(192/512/마스커블 512)는 전부 이 파일에서 만든 결과물이라, 아이콘을 바꾸려면 이 SVG를 고치고 다시 렌더링해야 한다 (PNG는 `sharp`로 `kernel: 'nearest'` 리사이즈해야 픽셀 경계가 흐려지지 않는다 — 작업 끝나면 `sharp`는 다시 제거). 디자인 컨셉은 위 "디자인 컨셉 — 픽셀/도트 느낌" 참고.
-- `.claude/agents/interior-design-assistant.md` — 인테리어 도메인 전담 서브에이전트. 다른 도메인(예산, 계약 검토 등)이 구체화되면 같은 방식으로 도메인별 에이전트를 추가한다.
+- `.claude/agents/` — 도메인별 서브에이전트 (2026-09-16, 예산·대출 도메인이 구체화되면서 인테리어 전용 하나뿐이던 걸 확장함). 새 도메인이 추가되면 같은 방식으로 도메인별 에이전트를 늘린다.
+  - `interior-design-assistant.md` — 인테리어(공간구성/자재/시공/견적) 전담.
+  - `loan-assistant.md` — 대출(디딤돌대출)/혼인신고 전담.
+  - `budget-assistant.md` — 예산/지출 분석 전담.
+  - `fact-checker.md` — 도메인에 종속되지 않는 검증 전담. 업체 정보·정책·수치 등 데이터에 적힌 사실 주장을 외부 출처와 대조해서 "확인됨/확인 안 됨/판단 보류"를 근거와 함께 판정한다 (도메인 에이전트가 새 정보를 채워 넣는 역할이라면, 이건 그 정보를 의심하고 대조하는 역할 — 그래서 도메인별로 만들지 않고 하나로 공용).
 - `.claude/skills/interior-notion-project/SKILL.md` — (완전 레거시) 예전에 Notion으로 관리하던 시절의 페이지 구조 기록. Notion은 더 이상 사용하지 않으며, 과거 정리 내용을 참고만 할 때 남겨둠.
 
 ## Supabase 테이블: checklist_items
