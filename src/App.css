@@ -677,15 +677,20 @@ th, td {
   /* 좁은 화면에서 표 컬럼을 억지로 욱여넣으면 숫자/텍스트가 글자 단위로 깨진다 (2026-09-14 발견,
      예산·시공범위 표에서 재현). table을 block으로 바꿔 표 자체가 가로 스크롤되게 하고,
      셀 내용은 줄바꿈하지 않아 원래 너비를 유지한다 — thead/tbody/tr은 기본 table 표시값을
-     유지하므로 컬럼 정렬은 그대로 보존된다. */
-  table {
+     유지하므로 컬럼 정렬은 그대로 보존된다.
+     2026-09-16: 이 규칙이 bare `table` 셀렉터라 홈 화면의 FullCalendar(.calendar-wrap 안의
+     table)까지 걸려서 달력 전체 행이 1px로 찌그러지는 버그가 있었음 — 실제 데이터 표에만 붙는
+     .data-table/.info-table로 좁혀서 FullCalendar의 자체 table 레이아웃을 건드리지 않게 함. */
+  .data-table,
+  .info-table {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
   }
 
-  th, td {
+  .data-table th, .data-table td,
+  .info-table th, .info-table td {
     white-space: nowrap;
   }
 
