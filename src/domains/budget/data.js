@@ -23,7 +23,7 @@ export const items = [
   { category: "스드메", name: "스튜디오 원본/수정본", total: 440000, unpaid: 440000, paidBy: [], memo: "" },
   { category: "스드메", name: "스드메 총 비용", total: 2751000, unpaid: 0, paidBy: [], memo: "예상 비용" },
   { category: "예물", name: "결혼 반지", total: 2560000, unpaid: 0, paidBy: ["이주엽"], memo: "" },
-  { category: "예물", name: "가방", total: 6000000, unpaid: 5000000, paidBy: [], memo: "" },
+  { category: "예물", name: "가방", total: 6000000, unpaid: 6000000, paidBy: [], memo: "" },
   { category: "촬영", name: "헤어변형", total: 330000, unpaid: 220000, paidBy: ["김소윤"], memo: "" },
   { category: "결혼식", name: "부케", total: 300000, unpaid: 300000, paidBy: [], memo: "예상비용" },
   { category: "신혼집", name: "신혼집 인테리어", total: 15000000, unpaid: 15000000, paidBy: [], memo: "인테리어 도메인 '시공 범위' 탭 예상 비용 범위(약 1,175~1,835만원) 중간값 — 실제 견적 확정 전 추정치" },
