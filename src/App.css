@@ -622,6 +622,20 @@ th, td {
   color: #b6301f;
 }
 
+.quote-settled {
+  margin: 18px 0 0;
+  padding: 12px 16px;
+  border: 1px solid #3fa796;
+  border-radius: 4px;
+  background: #e7f9f2;
+  font-size: 0.9rem;
+  max-width: 75ch;
+}
+
+.quote-settled b {
+  color: #117f69;
+}
+
 .quote-mismatch {
   margin: 0;
   padding: 10px 14px;
