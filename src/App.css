@@ -631,6 +631,15 @@ th, td {
   font-weight: 600;
 }
 
+.quote-mismatch b {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 0 6px;
+  border: 1px solid #e0524b;
+  border-radius: 2px;
+  font-size: 0.75rem;
+}
+
 .quote-toggle {
   display: inline-flex;
   align-items: center;

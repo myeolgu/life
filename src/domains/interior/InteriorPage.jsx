@@ -488,7 +488,7 @@ function QuoteSection({ section, hideBlank }) {
       </summary>
       {mismatch && (
         <p className="quote-mismatch">
-          ⚠️ 항목을 더한 값({won(sum.total)})이 견적서에 적힌 공종 합계({won(section.subtotal)})와 다릅니다 — 원본을 다시 확인하세요.
+          <b>합계 불일치</b> 항목을 더한 값({won(sum.total)})이 견적서에 적힌 공종 합계({won(section.subtotal)})와 다릅니다 — 원본을 다시 확인하세요.
         </p>
       )}
       <table className="data-table quote-lines">
@@ -526,6 +526,9 @@ function QuoteDetail({ contractorNo, seed }) {
 
   const rows = sections.map((s) => ({ section: s, sum: sectionAmount(s) }));
   const itemsTotal = rows.reduce((acc, r) => acc + r.sum.total, 0);
+  // 모든 줄이 blank인 견적이 들어와도 비중 칸이 NaN%가 되지 않게 나눗셈 분모만 0을 막는다
+  // (itemsTotal 자체는 화면에 금액으로 찍히므로 그대로 둔다).
+  const shareBase = itemsTotal || 1;
   const maxShare = rows.reduce((acc, r) => Math.max(acc, r.sum.total), 0) || 1;
   const materialTotal = rows.reduce((acc, r) => acc + r.sum.material, 0);
   const laborTotal = rows.reduce((acc, r) => acc + r.sum.labor, 0);
@@ -556,7 +559,7 @@ function QuoteDetail({ contractorNo, seed }) {
                   <span className="quote-bar">
                     <i style={{ width: `${(sum.total / maxShare) * 100}%` }} />
                   </span>
-                  <span className="quote-share-pct">{((sum.total / itemsTotal) * 100).toFixed(1)}%</span>
+                  <span className="quote-share-pct">{((sum.total / shareBase) * 100).toFixed(1)}%</span>
                 </span>
               </td>
             </tr>
@@ -588,6 +591,9 @@ function QuoteDetail({ contractorNo, seed }) {
 function QuotePage({ contractor, onBack }) {
   const quote = contractor.quote;
   const seed = quoteSectionsSeed[contractor.no] ?? [];
+  // 나중에 추가되는 업체가 총액만 있는 견적을 들고 와도 화면이 죽지 않게, 없을 수 있는 값은 전부 가드한다.
+  const questions = quote.questions ?? [];
+  const hasMeta = quote.docTitle || quote.vendorLine || quote.terms;
   const stack = quote.material
     ? [
         { label: "재료비", value: quote.material, cls: "quote-c-material" },
@@ -601,6 +607,7 @@ function QuotePage({ contractor, onBack }) {
     <section className="quote-view">
       <button className="back-link" onClick={onBack}>← 목록으로</button>
       <h2>{contractor.no}. {contractor.name} — 견적서</h2>
+      {hasMeta && (
       <dl className="quote-meta">
         {quote.docTitle && (
           <>
@@ -621,6 +628,7 @@ function QuotePage({ contractor, onBack }) {
           </>
         )}
       </dl>
+      )}
 
       <div className="quote-hero">
         <p className="quote-kind">
@@ -630,7 +638,10 @@ function QuotePage({ contractor, onBack }) {
           </span>
         </p>
         <p className="quote-figure">{won(quote.total)}</p>
-        <p className="muted">부가세 {quote.vat} — {quote.vatNote} · 견적일 {quote.date}</p>
+        <p className="muted">
+          부가세 {quote.vat}
+          {quote.vatNote && ` — ${quote.vatNote}`} · 견적일 {quote.date}
+        </p>
         {stack.length > 0 && (
           <>
             <div className="quote-stack">
@@ -684,16 +695,20 @@ function QuotePage({ contractor, onBack }) {
         </>
       )}
 
-      <h3>업체에 확인할 것</h3>
-      <p className="muted">견적서만으로는 알 수 없어서 계약 전에 서면으로 받아야 하는 내용입니다.</p>
-      <ol className="quote-ask">
-        {quote.questions.map((q) => (
-          <li key={q.t}>
-            <b>{q.t}</b>
-            <span>{q.d}</span>
-          </li>
-        ))}
-      </ol>
+      {questions.length > 0 && (
+        <>
+          <h3>업체에 확인할 것</h3>
+          <p className="muted">견적서만으로는 알 수 없어서 계약 전에 서면으로 받아야 하는 내용입니다.</p>
+          <ol className="quote-ask">
+            {questions.map((q) => (
+              <li key={q.t}>
+                <b>{q.t}</b>
+                <span>{q.d}</span>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
 
       {quote.kind === "written" && (
         <p className="callout">
