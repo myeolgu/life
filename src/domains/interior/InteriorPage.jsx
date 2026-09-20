@@ -401,6 +401,46 @@ function ContractorChecklistPage({ contractor, onBack }) {
   );
 }
 
+const won = (n) => `${n.toLocaleString("ko-KR")}원`;
+
+function QuoteBlock({ quote }) {
+  return (
+    <div className="quote-block">
+      <p>
+        <b>견적</b>{" "}
+        <span className={`verify-badge ${quote.kind === "written" ? "verified" : "unverified"}`}>
+          {quote.kind === "written" ? "서면 견적서" : "구두 (서면 없음)"}
+        </span>
+      </p>
+      <p className="quote-total">{won(quote.total)}</p>
+      <p className="muted">부가세 {quote.vat} · 견적일 {quote.date}</p>
+      {quote.breakdown.length > 0 && (
+        <details>
+          <summary>공종별 내역</summary>
+          <table className="data-table">
+            <tbody>
+              {quote.breakdown.map((row) => (
+                <tr key={row.label}>
+                  <td>{row.label}</td>
+                  <td className="quote-amount">{won(row.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
+      <details>
+        <summary>확인 필요 사항 ({quote.notes.length})</summary>
+        <ul>
+          {quote.notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  );
+}
+
 function Contractors() {
   const { items: contractors } = useContentItems("interior", "contractors", contractorsSeed);
   const [selected, setSelected] = useState(null);
@@ -431,6 +471,7 @@ function Contractors() {
             <p><b>거리</b> {c.distance}</p>
             <p><b>연락처</b> {c.contact}</p>
             <p className="action">{c.note}</p>
+            {c.quote && <QuoteBlock quote={c.quote} />}
             {c.portfolioUrl && (
               <a className="event-detail-link" href={c.portfolioUrl} target="_blank" rel="noreferrer">
                 오늘의집 포트폴리오 보기 →
