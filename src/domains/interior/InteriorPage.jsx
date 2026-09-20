@@ -365,7 +365,9 @@ function ContractorsMap({ contractors }) {
 function reviewSeedForContractor(no) {
   return contractReviewSeed.map((item) => ({ ...item, id: `${item.id}:${no}` }));
 }
-const allContractorReviewSeed = [1, 2, 3].flatMap(reviewSeedForContractor);
+// 업체 번호는 시드(contractors)에서 가져온다 — 예전엔 [1, 2, 3]을 손으로 적어둬서, 업체를 추가하면
+// 그 업체의 체크리스트가 조용히 비어버렸다 (2026-09-20 미송디자인 추가하면서 발견).
+const allContractorReviewSeed = contractorsSeed.map((c) => c.no).flatMap(reviewSeedForContractor);
 
 // 2026-09-15: 처음엔 팝업(모달)으로 만들었는데 폭이 너무 좁다는 피드백을 받아 전용 페이지
 // 형태로 변경 — 업체 카드 목록 대신 이 화면 전체를 체크리스트로 바꿔서 보여주고, 상단
@@ -760,7 +762,7 @@ function Contractors() {
     <section>
       <h2>시공업체 후보</h2>
       <p className="muted">
-        디자인큐원은 서면 견적서, 봄인테리어는 구두 견적을 받았고 데코크로스디자인은 아직 상담 전입니다.
+        디자인큐원은 서면 견적서, 봄인테리어는 구두 견적을 받았고 데코크로스디자인·미송디자인은 아직 견적을 못 받았습니다.
         부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
         카드의 "견적서 보기"는 그 업체 견적 내역, "체크리스트 보기"는 상담·계약 체크리스트 페이지로 이동합니다.
       </p>
@@ -799,8 +801,8 @@ function Contractors() {
         ))}
       </div>
 
-      <h3>위치 비교 (★ 부개주공1단지 · 1~3 업체)</h3>
-      <p className="muted">지도 위 숫자 핀이 각 업체 위치입니다. 위 카드 번호와 동일합니다.</p>
+      <h3>위치 비교 (★ 부개주공1단지)</h3>
+      <p className="muted">지도 위 숫자 핀이 각 업체 위치입니다. 위 카드 번호와 동일하고, 주소가 확인된 업체만 표시됩니다.</p>
       <ContractorsMap contractors={contractors} />
 
       <p className="callout">
