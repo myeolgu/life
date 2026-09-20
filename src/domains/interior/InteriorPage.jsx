@@ -458,6 +458,7 @@ function QuoteLineRow({ line }) {
         {line.hl && <span className="quote-tag quote-tag-hl">원본 강조</span>}
         {line.svc && <span className="quote-tag quote-tag-svc">서비스</span>}
         {line.blank && <span className="quote-tag quote-tag-blank">금액 없음</span>}
+        {line.mark && <span className="quote-tag quote-tag-svc">{line.mark}</span>}
         {line.s && <small>{line.s}</small>}
       </td>
       <td className="quote-amount quote-qty">{line.blank || line.svc ? "—" : `${line.q} ${line.u}`}</td>
@@ -594,6 +595,10 @@ function QuotePage({ contractor, onBack }) {
   // 나중에 추가되는 업체가 총액만 있는 견적을 들고 와도 화면이 죽지 않게, 없을 수 있는 값은 전부 가드한다.
   const questions = quote.questions ?? [];
   const hasMeta = quote.docTitle || quote.vendorLine || quote.terms;
+  const emptyGroups = quote.emptyGroups ?? [];
+  // 금액이 빈 공종이라고 다 추가 비용은 아니다 — 이 집에 없거나 안 하기로 한 것은 빼고,
+  // 실제로 금액이 더 붙을 수 있는 "결정 필요"만 상단 경고로 올린다.
+  const pending = emptyGroups.filter((g) => g.status === "결정 필요");
   const stack = quote.material
     ? [
         { label: "재료비", value: quote.material, cls: "quote-c-material" },
@@ -665,25 +670,36 @@ function QuotePage({ contractor, onBack }) {
         )}
       </div>
 
-      {quote.emptyGroups?.length > 0 && (
+      {pending.length > 0 && (
         <p className="quote-alert">
-          <b>이 금액에 빠진 것.</b> 항목만 있고 금액이 비어 있는 공종이 있습니다 — {quote.emptyGroups.map((g) => g.name).join(", ")}.
-          견적서 특기사항에도 "견적내역외 물량은 별도"라고 되어 있어, 최종 공사비는 더 늘어날 수 있습니다.
+          <b>아직 정해야 할 것.</b> 금액이 비어 있고 이번 공사에 넣을지 정해야 하는 공종이 있습니다 — {pending.map((g) => g.name).join(", ")}.
+          둘 다 마감을 끝낸 뒤에는 다시 뜯어야 하는 공사라 착공 전에 결정해야 하고, 넣으면 그만큼 공사비가 올라갑니다.
         </p>
       )}
 
       {seed.length > 0 && <QuoteDetail contractorNo={contractor.no} seed={seed} />}
 
-      {quote.emptyGroups?.length > 0 && (
+      {emptyGroups.length > 0 && (
         <>
           <h3>금액이 통째로 비어 있는 공종</h3>
           <p className="muted">
-            견적서에 항목 이름만 있고 금액이 하나도 없습니다. 공사에서 제외된 것인지, 추후 견적인지는 견적서로 알 수 없습니다.
+            견적서에는 항목 이름만 있고 금액이 하나도 없는 칸입니다. 왜 비어 있는지는 아래에 공종별로 적어뒀습니다.
           </p>
           <div className="quote-empty-grid">
-            {quote.emptyGroups.map((group) => (
-              <div className="quote-empty-card" key={group.name}>
-                <h4>{group.name}</h4>
+            {emptyGroups.map((group) => (
+              <div
+                className={`quote-empty-card${group.status === "결정 필요" ? " quote-empty-pending" : ""}`}
+                key={group.name}
+              >
+                <h4>
+                  {group.name}
+                  {group.status && (
+                    <span className={`quote-tag ${group.status === "결정 필요" ? "quote-tag-blank" : "quote-tag-svc"}`}>
+                      {group.status}
+                    </span>
+                  )}
+                </h4>
+                {group.statusNote && <p className="quote-empty-note">{group.statusNote}</p>}
                 <ul>
                   {group.items.map((item) => (
                     <li key={item}>{item}</li>

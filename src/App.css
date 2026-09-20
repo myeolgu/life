@@ -822,16 +822,27 @@ th, td {
   margin: 14px 0;
 }
 
+/* 기본은 "추가 비용 아님"(회색 점선), 결정이 남은 공종만 빨간 점선으로 눈에 띄게 한다. */
 .quote-empty-card {
-  border: 1px dashed #e0524b;
+  border: 1px dashed var(--border);
   border-radius: 4px;
   padding: 12px 16px;
   background: var(--surface);
 }
 
+.quote-empty-card.quote-empty-pending {
+  border-color: #e0524b;
+}
+
 .quote-empty-card h4 {
   margin: 0 0 8px;
   font-size: 0.95rem;
+}
+
+.quote-empty-note {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .quote-empty-card ul {
