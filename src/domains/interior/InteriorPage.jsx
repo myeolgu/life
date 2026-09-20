@@ -15,6 +15,7 @@ import {
   contractReview as contractReviewSeed,
   contractors as contractorsSeed,
   quoteSections as quoteSectionsSeed,
+  requirements as requirementsSeed,
   progress,
 } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
@@ -29,6 +30,7 @@ const arrowIconSrc = `${import.meta.env.BASE_URL}icons/pixel/arrow.png`;
 
 const TABS = [
   { key: "contractors", label: "시공업체" },
+  { key: "requirements", label: "요구사항" },
   { key: "progress", label: "진행 상황" },
   { key: "property", label: "매물 정보" },
   { key: "scope", label: "시공 범위" },
@@ -808,6 +810,61 @@ function Contractors() {
   );
 }
 
+// 2026-09-20: 업체 상담 때마다 같은 요구사항을 다시 설명하지 않도록 모아둔 탭.
+// 각 요구사항 옆에 디자인큐원 견적서와 대조한 결과를 붙여서, 다른 업체를 상담할 때도
+// "이걸 견적에 넣었는지"를 그대로 체크리스트처럼 쓸 수 있다.
+const REQ_STATE = {
+  match: { label: "견적 반영", cls: "verified" },
+  partial: { label: "일부 반영", cls: "req-partial" },
+  conflict: { label: "견적과 다름", cls: "unverified" },
+  missing: { label: "견적서에 없음", cls: "req-partial" },
+  none: { label: "대조 대상 아님", cls: "req-none" },
+};
+
+function Requirements() {
+  const { items: spaces } = useContentItems("interior", "requirements", requirementsSeed);
+  const all = spaces.flatMap((s) => s.items);
+  const needsAction = all.filter((i) => i.quote?.state === "conflict" || i.quote?.state === "partial" || i.quote?.state === "missing");
+  const conflicts = all.filter((i) => i.quote?.state === "conflict");
+
+  return (
+    <section>
+      <h2>우리 요구사항</h2>
+      <p className="muted">
+        업체 상담 때 그대로 읽어주면 되도록 공간별로 모았습니다. 각 항목 옆에는 (주)디자인큐원 2026-09-19 견적서와 대조한 결과를 붙였습니다 —
+        다른 업체 견적을 받을 때도 같은 기준으로 확인하세요.
+      </p>
+      <p className="callout">
+        요구사항 {all.length}개 중 견적서와 <b>다르거나 확인이 필요한 것이 {needsAction.length}개</b>
+        {conflicts.length > 0 && <> (그중 견적과 직접 충돌 {conflicts.length}개)</>}입니다.
+      </p>
+
+      <div className="card-grid">
+        {spaces.map((space) => (
+          <div className="card req-card" key={space.space}>
+            <h3>{space.space}</h3>
+            <ul className="req-list">
+              {space.items.map((item) => {
+                const state = REQ_STATE[item.quote?.state] ?? REQ_STATE.none;
+                return (
+                  <li key={item.text}>
+                    <p className="req-text">
+                      <b>{item.text}</b>
+                      {item.status === "미정" && <span className="quote-tag quote-tag-hl">미정</span>}
+                      <span className={`verify-badge ${state.cls}`}>{state.label}</span>
+                    </p>
+                    {item.quote?.note && <p className="muted req-note">{item.quote.note}</p>}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 const REVIEW_GROUP_ORDER = ["견적서 검토", "계약서 검토"];
 
 function groupReviewItems(items) {
@@ -884,6 +941,7 @@ export default function InteriorPage({ onBack }) {
           {tab === "scope" && <Scope />}
           {tab === "timeline" && <Timeline />}
           {tab === "contractors" && <Contractors />}
+          {tab === "requirements" && <Requirements />}
           {tab === "checklist" && <ContractChecklist />}
         </ErrorBoundary>
       </main>

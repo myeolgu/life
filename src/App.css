@@ -622,6 +622,57 @@ th, td {
   color: #b6301f;
 }
 
+/* 요구사항 탭 — 공간별 카드 안에서 항목 + 견적 대조 결과를 세로로 쌓는다. */
+.req-card {
+  min-width: 0;
+}
+
+.req-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.req-list li {
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+.req-list li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.req-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0 0 4px;
+}
+
+.req-text .quote-tag {
+  margin-left: 0;
+}
+
+.req-note {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.verify-badge.req-partial {
+  background: #f6dc9b;
+  color: #5b4210;
+}
+
+.verify-badge.req-none {
+  background: var(--accent-soft);
+  color: var(--text-muted);
+}
+
 .quote-settled {
   margin: 18px 0 0;
   padding: 12px 16px;
