@@ -14,6 +14,7 @@ import {
   contractChecklist as contractChecklistSeed,
   contractReview as contractReviewSeed,
   contractors as contractorsSeed,
+  quoteSections as quoteSectionsSeed,
   progress,
 } from "./data";
 import { useChecklist } from "../../hooks/useChecklist";
@@ -401,12 +402,32 @@ function ContractorChecklistPage({ contractor, onBack }) {
   );
 }
 
-const won = (n) => `${n.toLocaleString("ko-KR")}원`;
+// 2026-09-20: 업체 카드에서 "견적서 보기"로 여는 견적서 전용 화면.
+// 금액은 DB에 저장하지 않고 항상 수량×단가로 다시 계산한다 — 견적서에 적힌 공종 합계(subtotal)와
+// 대조해서 어긋나면 화면에 바로 경고를 띄우기 위해서다 (숫자를 옮기다 틀리면 조용히 넘어가지 않게).
+const num = (n) => n.toLocaleString("ko-KR");
+const won = (n) => `${num(n)}원`;
 
-function QuoteBlock({ quote }) {
+function lineAmount(ln) {
+  const material = ln.mu != null ? Math.round((ln.q ?? 1) * ln.mu) : 0;
+  const labor = ln.lu != null ? Math.round((ln.q ?? 1) * ln.lu) : 0;
+  return { material, labor, total: material + labor };
+}
+
+function sectionAmount(section) {
+  return section.lines.reduce(
+    (acc, ln) => {
+      const a = lineAmount(ln);
+      return { material: acc.material + a.material, labor: acc.labor + a.labor, total: acc.total + a.total };
+    },
+    { material: 0, labor: 0, total: 0 }
+  );
+}
+
+function QuoteCardSummary({ quote }) {
   return (
     <div className="quote-block">
-      <p>
+      <p className="quote-kind">
         <b>견적</b>{" "}
         <span className={`verify-badge ${quote.kind === "written" ? "verified" : "unverified"}`}>
           {quote.kind === "written" ? "서면 견적서" : "구두 (서면 없음)"}
@@ -414,39 +435,286 @@ function QuoteBlock({ quote }) {
       </p>
       <p className="quote-total">{won(quote.total)}</p>
       <p className="muted">부가세 {quote.vat} · 견적일 {quote.date}</p>
-      {quote.breakdown.length > 0 && (
-        <details>
-          <summary>공종별 내역</summary>
-          <table className="data-table">
-            <tbody>
-              {quote.breakdown.map((row) => (
-                <tr key={row.label}>
-                  <td>{row.label}</td>
-                  <td className="quote-amount">{won(row.amount)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </details>
-      )}
-      <details>
-        <summary>확인 필요 사항 ({quote.notes.length})</summary>
-        <ul>
-          {quote.notes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      </details>
     </div>
+  );
+}
+
+function QuoteLineRow({ line }) {
+  const { material, labor, total } = lineAmount(line);
+  const cell = (amount, unitPrice) => {
+    if (!amount) return "—";
+    return (
+      <>
+        {num(amount)}
+        {line.q !== 1 && <small>@{num(unitPrice)}</small>}
+      </>
+    );
+  };
+
+  return (
+    <tr className={line.blank ? "quote-row-blank" : line.svc ? "quote-row-svc" : undefined}>
+      <td>
+        <b>{line.n}</b>
+        {line.hl && <span className="quote-tag quote-tag-hl">원본 강조</span>}
+        {line.svc && <span className="quote-tag quote-tag-svc">서비스</span>}
+        {line.blank && <span className="quote-tag quote-tag-blank">금액 없음</span>}
+        {line.s && <small>{line.s}</small>}
+      </td>
+      <td className="quote-amount quote-qty">{line.blank || line.svc ? "—" : `${line.q} ${line.u}`}</td>
+      <td className="quote-amount">{line.blank || line.svc ? "—" : cell(material, line.mu)}</td>
+      <td className="quote-amount">{line.blank || line.svc ? "—" : cell(labor, line.lu)}</td>
+      <td className="quote-amount strong">{line.svc ? "0" : line.blank ? "—" : num(total)}</td>
+    </tr>
+  );
+}
+
+function QuoteSection({ section, hideBlank }) {
+  const sum = sectionAmount(section);
+  const blanks = section.lines.filter((l) => l.blank).length;
+  const mismatch = section.subtotal != null && sum.total !== section.subtotal;
+  const lines = hideBlank ? section.lines.filter((l) => !l.blank) : section.lines;
+
+  return (
+    <details className="quote-sec" open>
+      <summary>
+        <span className="quote-sec-name">
+          {section.name}
+          {section.note && <em>{section.note}</em>}
+        </span>
+        <span className="quote-sec-meta">
+          {blanks > 0 && <span className="quote-tag quote-tag-blank">금액 없는 항목 {blanks}</span>}
+          <span className="quote-sec-total">{won(sum.total)}</span>
+        </span>
+      </summary>
+      {mismatch && (
+        <p className="quote-mismatch">
+          ⚠️ 항목을 더한 값({won(sum.total)})이 견적서에 적힌 공종 합계({won(section.subtotal)})와 다릅니다 — 원본을 다시 확인하세요.
+        </p>
+      )}
+      <table className="data-table quote-lines">
+        <thead>
+          <tr>
+            <th>품명 · 규격</th>
+            <th className="quote-amount">수량</th>
+            <th className="quote-amount">재료비</th>
+            <th className="quote-amount">노무비</th>
+            <th className="quote-amount">합계</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lines.map((line, i) => (
+            <QuoteLineRow key={`${line.n}-${i}`} line={line} />
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>소계</td>
+            <td />
+            <td className="quote-amount">{sum.material ? num(sum.material) : "—"}</td>
+            <td className="quote-amount">{sum.labor ? num(sum.labor) : "—"}</td>
+            <td className="quote-amount strong">{num(sum.total)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </details>
+  );
+}
+
+function QuoteDetail({ contractorNo, seed }) {
+  const { items: sections } = useContentItems("interior", `quote:${contractorNo}`, seed);
+  const [hideBlank, setHideBlank] = useState(false);
+
+  const rows = sections.map((s) => ({ section: s, sum: sectionAmount(s) }));
+  const itemsTotal = rows.reduce((acc, r) => acc + r.sum.total, 0);
+  const maxShare = rows.reduce((acc, r) => Math.max(acc, r.sum.total), 0) || 1;
+  const materialTotal = rows.reduce((acc, r) => acc + r.sum.material, 0);
+  const laborTotal = rows.reduce((acc, r) => acc + r.sum.labor, 0);
+
+  return (
+    <>
+      <h3>공종별 요약</h3>
+      <p className="muted">항목 합계({won(itemsTotal)}) 대비 비중입니다.</p>
+      <table className="data-table quote-overview">
+        <thead>
+          <tr>
+            <th>공종</th>
+            <th className="quote-amount">재료비</th>
+            <th className="quote-amount">노무비</th>
+            <th className="quote-amount">합계</th>
+            <th>비중</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ section, sum }) => (
+            <tr key={section.id}>
+              <td>{section.name}</td>
+              <td className="quote-amount">{sum.material ? num(sum.material) : "—"}</td>
+              <td className="quote-amount">{sum.labor ? num(sum.labor) : "—"}</td>
+              <td className="quote-amount strong">{num(sum.total)}</td>
+              <td className="quote-share">
+                <span>
+                  <span className="quote-bar">
+                    <i style={{ width: `${(sum.total / maxShare) * 100}%` }} />
+                  </span>
+                  <span className="quote-share-pct">{((sum.total / itemsTotal) * 100).toFixed(1)}%</span>
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>항목 합계</td>
+            <td className="quote-amount">{num(materialTotal)}</td>
+            <td className="quote-amount">{num(laborTotal)}</td>
+            <td className="quote-amount strong">{num(itemsTotal)}</td>
+            <td />
+          </tr>
+        </tfoot>
+      </table>
+
+      <h3>항목별 내역</h3>
+      <p className="muted">수량 × 단가로 계산한 금액입니다. 견적서에 항목은 있지만 금액이 없는 줄은 흐리게 표시했습니다.</p>
+      <label className="quote-toggle">
+        <input type="checkbox" checked={hideBlank} onChange={() => setHideBlank((v) => !v)} /> 금액 없는 항목 숨기기
+      </label>
+      {rows.map(({ section }) => (
+        <QuoteSection key={section.id} section={section} hideBlank={hideBlank} />
+      ))}
+    </>
+  );
+}
+
+function QuotePage({ contractor, onBack }) {
+  const quote = contractor.quote;
+  const seed = quoteSectionsSeed[contractor.no] ?? [];
+  const stack = quote.material
+    ? [
+        { label: "재료비", value: quote.material, cls: "quote-c-material" },
+        { label: "노무비", value: quote.labor, cls: "quote-c-labor" },
+        { label: "경비", value: quote.overhead, cls: "quote-c-overhead" },
+        { label: `일반관리비 ${quote.mgmtRate}`, value: quote.mgmt, cls: "quote-c-mgmt" },
+      ]
+    : [];
+
+  return (
+    <section className="quote-view">
+      <button className="back-link" onClick={onBack}>← 목록으로</button>
+      <h2>{contractor.no}. {contractor.name} — 견적서</h2>
+      <dl className="quote-meta">
+        {quote.docTitle && (
+          <>
+            <dt>공사명</dt>
+            <dd>{quote.docTitle}</dd>
+          </>
+        )}
+        {quote.vendorLine && (
+          <>
+            <dt>업체</dt>
+            <dd>{quote.vendorLine}</dd>
+          </>
+        )}
+        {quote.terms && (
+          <>
+            <dt>조건</dt>
+            <dd>{quote.terms}</dd>
+          </>
+        )}
+      </dl>
+
+      <div className="quote-hero">
+        <p className="quote-kind">
+          합계금액{" "}
+          <span className={`verify-badge ${quote.kind === "written" ? "verified" : "unverified"}`}>
+            {quote.kind === "written" ? "서면 견적서" : "구두 (서면 없음)"}
+          </span>
+        </p>
+        <p className="quote-figure">{won(quote.total)}</p>
+        <p className="muted">부가세 {quote.vat} — {quote.vatNote} · 견적일 {quote.date}</p>
+        {stack.length > 0 && (
+          <>
+            <div className="quote-stack">
+              {stack.map((part) => (
+                <i key={part.label} className={part.cls} style={{ width: `${(part.value / quote.total) * 100}%` }} />
+              ))}
+            </div>
+            <ul className="quote-legend">
+              {stack.map((part) => (
+                <li key={part.label}>
+                  <span className={`legend-dot ${part.cls}`} />
+                  {part.label}
+                  <b>{won(part.value)}</b>
+                </li>
+              ))}
+            </ul>
+            <p className="muted quote-recon">
+              공사금액 {won(quote.construction)}(재료비 + 노무비 + 경비)에 일반관리비 {quote.mgmtRate}를 더한 금액입니다. 기업이윤 칸은 비어 있습니다.
+            </p>
+          </>
+        )}
+      </div>
+
+      {quote.emptyGroups?.length > 0 && (
+        <p className="quote-alert">
+          <b>이 금액에 빠진 것.</b> 항목만 있고 금액이 비어 있는 공종이 있습니다 — {quote.emptyGroups.map((g) => g.name).join(", ")}.
+          견적서 특기사항에도 "견적내역외 물량은 별도"라고 되어 있어, 최종 공사비는 더 늘어날 수 있습니다.
+        </p>
+      )}
+
+      {seed.length > 0 && <QuoteDetail contractorNo={contractor.no} seed={seed} />}
+
+      {quote.emptyGroups?.length > 0 && (
+        <>
+          <h3>금액이 통째로 비어 있는 공종</h3>
+          <p className="muted">
+            견적서에 항목 이름만 있고 금액이 하나도 없습니다. 공사에서 제외된 것인지, 추후 견적인지는 견적서로 알 수 없습니다.
+          </p>
+          <div className="quote-empty-grid">
+            {quote.emptyGroups.map((group) => (
+              <div className="quote-empty-card" key={group.name}>
+                <h4>{group.name}</h4>
+                <ul>
+                  {group.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <h3>업체에 확인할 것</h3>
+      <p className="muted">견적서만으로는 알 수 없어서 계약 전에 서면으로 받아야 하는 내용입니다.</p>
+      <ol className="quote-ask">
+        {quote.questions.map((q) => (
+          <li key={q.t}>
+            <b>{q.t}</b>
+            <span>{q.d}</span>
+          </li>
+        ))}
+      </ol>
+
+      {quote.kind === "written" && (
+        <p className="callout">
+          원본 스캔 10쪽(표지 + 본문 9장)을 한 줄씩 대조해서 옮긴 것입니다. 공종 소계와 쪽별 재료비·노무비 소계, 표지 합계가 모두 일치하는 것을 확인했습니다 —
+          다만 규격 표기는 스캔 판독이라 원본을 우선하세요.
+        </p>
+      )}
+    </section>
   );
 }
 
 function Contractors() {
   const { items: contractors } = useContentItems("interior", "contractors", contractorsSeed);
+  // { contractor, mode: "checklist" | "quote" } — 목록 대신 그 업체의 전용 화면을 보여준다.
   const [selected, setSelected] = useState(null);
 
-  if (selected) {
-    return <ContractorChecklistPage contractor={selected} onBack={() => setSelected(null)} />;
+  if (selected?.mode === "checklist") {
+    return <ContractorChecklistPage contractor={selected.contractor} onBack={() => setSelected(null)} />;
+  }
+  if (selected?.mode === "quote") {
+    return <QuotePage contractor={selected.contractor} onBack={() => setSelected(null)} />;
   }
 
   return (
@@ -471,15 +739,22 @@ function Contractors() {
             <p><b>거리</b> {c.distance}</p>
             <p><b>연락처</b> {c.contact}</p>
             <p className="action">{c.note}</p>
-            {c.quote && <QuoteBlock quote={c.quote} />}
+            {c.quote && <QuoteCardSummary quote={c.quote} />}
             {c.portfolioUrl && (
               <a className="event-detail-link" href={c.portfolioUrl} target="_blank" rel="noreferrer">
                 오늘의집 포트폴리오 보기 →
               </a>
             )}
-            <button className="btn-secondary" style={{ marginTop: 10 }} onClick={() => setSelected(c)}>
-              체크리스트 보기
-            </button>
+            <div className="card-actions">
+              {c.quote && (
+                <button className="btn-secondary" onClick={() => setSelected({ contractor: c, mode: "quote" })}>
+                  견적서 보기
+                </button>
+              )}
+              <button className="btn-secondary" onClick={() => setSelected({ contractor: c, mode: "checklist" })}>
+                체크리스트 보기
+              </button>
+            </div>
           </div>
         ))}
       </div>

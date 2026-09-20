@@ -472,6 +472,9 @@ th, td {
   image-rendering: pixelated;
 }
 
+/* 2026-09-20: 업체 카드의 견적 요약 + "견적서 보기"로 여는 견적서 전용 화면(.quote-view).
+   숫자를 세로로 비교해야 하는 화면이라 금액 칸은 전부 tabular-nums + 우측 정렬로 맞췄다.
+   카드/막대는 사이트 컨셉대로 모서리를 살짝만 굴리고(블로키), 막대는 도트로 끊어서 픽셀 느낌을 준다. */
 .quote-block {
   margin-top: 12px;
   padding-top: 8px;
@@ -482,24 +485,392 @@ th, td {
   margin: 4px 0;
 }
 
+.quote-kind {
+  font-size: 0.9rem;
+}
+
 .quote-total {
   font-size: 1.25rem;
   font-weight: 700;
-}
-
-.quote-block summary {
-  cursor: pointer;
-  font-weight: 600;
-  margin: 6px 0;
-}
-
-.quote-block table {
-  margin: 4px 0 8px;
+  font-variant-numeric: tabular-nums;
 }
 
 .quote-amount {
   text-align: right;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quote-view h3 {
+  margin: 32px 0 4px;
+  font-size: 1.05rem;
+}
+
+.quote-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 14px;
+  margin: 0 0 18px;
+  font-size: 0.88rem;
+}
+
+.quote-meta dt {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.quote-meta dd {
+  margin: 0;
+}
+
+.quote-hero {
+  border: 2px solid var(--text);
+  border-radius: 4px;
+  padding: 18px;
+  background-color: var(--surface);
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 14px 14px;
+  background-position: -6px -6px;
+  box-shadow: 4px 4px 0 var(--text);
+  max-width: 75ch;
+}
+
+.quote-hero p {
+  margin: 4px 0;
+}
+
+.quote-figure {
+  font-size: 2.4rem;
+  line-height: 1.15;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  margin: 4px 0 14px !important;
+}
+
+/* 도트로 끊은 막대 — 재료비/노무비/경비/일반관리비 비율 */
+.quote-stack {
+  display: flex;
+  height: 18px;
+  margin-top: 14px;
+  background: var(--border);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
+  mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
+}
+
+.quote-stack i {
+  display: block;
+  height: 100%;
+}
+
+.quote-c-material { background: #b4784a; }
+.quote-c-labor { background: #3fa796; }
+.quote-c-overhead { background: #e0524b; }
+.quote-c-mgmt { background: #5b3a24; }
+
+.quote-legend {
+  display: grid;
+  /* 라벨("일반관리비 4%")과 금액이 한 줄에 들어가야 해서 열 최소폭을 넉넉히 준다 —
+     150px로 뒀더니 데스크탑에서 마지막 항목만 두 줄로 접혔다. */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 6px 16px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.quote-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.quote-legend .legend-dot {
+  border-radius: 2px;
+}
+
+.quote-legend b {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.quote-recon {
+  margin-top: 14px !important;
+  font-size: 0.82rem;
+}
+
+.quote-alert {
+  margin: 18px 0 0;
+  padding: 12px 16px;
+  border: 1px solid #e0524b;
+  border-radius: 4px;
+  background: #fdecea;
+  font-size: 0.9rem;
+  max-width: 75ch;
+}
+
+.quote-alert b {
+  color: #b6301f;
+}
+
+.quote-mismatch {
+  margin: 0;
+  padding: 10px 14px;
+  background: #fdecea;
+  color: #b6301f;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.quote-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 14px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.quote-overview td:first-child,
+.quote-lines td:first-child {
+  min-width: 170px;
+}
+
+/* td에 직접 display:flex를 주면 셀이 표 레이아웃에서 빠져 테두리/정렬이 어긋난다 —
+   안쪽 span에만 flex를 준다 (2026-09-20에 실제로 깨진 걸 보고 고침). */
+.quote-share {
+  min-width: 140px;
+}
+
+.quote-share > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quote-bar {
+  display: block;
+  width: 84px;
+  height: 10px;
+  flex-shrink: 0;
+  background: var(--border);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 7px);
+  mask: repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 7px);
+}
+
+.quote-bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.quote-share-pct {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.quote-overview tfoot td,
+.quote-lines tfoot td {
+  font-weight: 700;
+  border-top: 2px solid var(--text);
+  border-bottom: 0;
+  background: var(--accent-soft);
+}
+
+.quote-sec {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.quote-sec > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.quote-sec > summary::-webkit-details-marker {
+  display: none;
+}
+
+.quote-sec-name::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--accent);
+  transition: transform 0.12s;
+}
+
+.quote-sec[open] .quote-sec-name::before {
+  transform: rotate(90deg);
+}
+
+.quote-sec-name em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.quote-sec-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quote-sec-total {
+  font-variant-numeric: tabular-nums;
+}
+
+.quote-lines {
+  margin: 0;
+}
+
+.quote-lines b {
+  font-weight: 500;
+}
+
+.quote-lines td small,
+.quote-lines .quote-amount small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.quote-lines .strong {
+  font-weight: 700;
+}
+
+.quote-qty {
+  color: var(--text-muted);
+}
+
+.quote-row-blank td,
+.quote-row-svc td {
+  color: var(--text-muted);
+}
+
+.quote-row-blank b {
+  font-weight: 400;
+}
+
+.quote-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.7;
+  border-radius: 2px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.quote-tag-hl {
+  background: #f6dc9b;
+  color: #5b4210;
+}
+
+.quote-tag-svc {
+  background: #e7f9f2;
+  color: #117f69;
+}
+
+.quote-tag-blank {
+  background: #fdecea;
+  color: #b6301f;
+  border: 1px solid #e0524b;
+}
+
+.quote-sec-meta .quote-tag {
+  margin-left: 0;
+}
+
+.quote-empty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.quote-empty-card {
+  border: 1px dashed #e0524b;
+  border-radius: 4px;
+  padding: 12px 16px;
+  background: var(--surface);
+}
+
+.quote-empty-card h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.quote-empty-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.quote-ask {
+  margin: 14px 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  max-width: 75ch;
+}
+
+.quote-ask li {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 4px;
+  padding: 12px 16px;
+  background: var(--surface);
+}
+
+.quote-ask b {
+  display: block;
+}
+
+.quote-ask span {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 480px) {
+  .quote-figure {
+    font-size: 1.9rem;
+  }
+
+  .quote-meta {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .quote-meta dt {
+    margin-top: 6px;
+  }
 }
 
 .verify-badge {
