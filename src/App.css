@@ -663,6 +663,12 @@ th, td {
   line-height: 1.55;
 }
 
+.req-source {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+}
+
 .verify-badge.req-partial {
   background: #f6dc9b;
   color: #5b4210;

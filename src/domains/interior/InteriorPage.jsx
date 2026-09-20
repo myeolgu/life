@@ -856,6 +856,11 @@ function Requirements() {
                       <span className={`verify-badge ${state.cls}`}>{state.label}</span>
                     </p>
                     {item.quote?.note && <p className="muted req-note">{item.quote.note}</p>}
+                    {item.quote?.sources?.map((s) => (
+                      <a className="req-source" key={s.url} href={s.url} target="_blank" rel="noreferrer">
+                        출처: {s.label}
+                      </a>
+                    ))}
                   </li>
                 );
               })}
