@@ -412,10 +412,13 @@ function ContractorChecklistPage({ contractor, onBack }) {
 const num = (n) => n.toLocaleString("ko-KR");
 const won = (n) => `${num(n)}원`;
 
+// au는 재료비/노무비를 나누지 않고 "공급단가" 한 칸만 적는 견적서용이다 (봄인테리어). 재료비·노무비 열은 비고
+// 합계에만 잡힌다 — mu에 넣으면 전액이 재료비로 보이기 때문에 따로 둔다.
 function lineAmount(ln) {
   const material = ln.mu != null ? Math.round((ln.q ?? 1) * ln.mu) : 0;
   const labor = ln.lu != null ? Math.round((ln.q ?? 1) * ln.lu) : 0;
-  return { material, labor, total: material + labor };
+  const flat = ln.au != null ? Math.round((ln.q ?? 1) * ln.au) : 0;
+  return { material, labor, total: material + labor + flat };
 }
 
 function sectionAmount(section) {
@@ -736,12 +739,7 @@ function QuotePage({ contractor, onBack }) {
         </>
       )}
 
-      {quote.kind === "written" && (
-        <p className="callout">
-          원본 스캔 10쪽(표지 + 본문 9장)을 한 줄씩 대조해서 옮긴 것입니다. 공종 소계와 쪽별 재료비·노무비 소계, 표지 합계가 모두 일치하는 것을 확인했습니다 —
-          다만 규격 표기는 스캔 판독이라 원본을 우선하세요.
-        </p>
-      )}
+      {quote.footnote && <p className="callout">{quote.footnote}</p>}
     </section>
   );
 }
@@ -762,7 +760,7 @@ function Contractors() {
     <section>
       <h2>시공업체 후보</h2>
       <p className="muted">
-        디자인큐원은 서면 견적서, 봄인테리어는 구두 견적을 받았고 데코크로스디자인·미송디자인은 아직 견적을 못 받았습니다.
+        디자인큐원과 봄인테리어는 서면 견적서를 받았고 데코크로스디자인·미송디자인은 아직 견적을 못 받았습니다.
         부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
         카드의 "견적서 보기"는 그 업체 견적 내역, "체크리스트 보기"는 상담·계약 체크리스트 페이지로 이동합니다.
       </p>
