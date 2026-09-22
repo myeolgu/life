@@ -299,6 +299,10 @@ const CONTRACTOR_LOCATIONS = {
   1: { lat: 37.5042615, lng: 126.7128978 },
   2: { lat: 37.4981899, lng: 126.7397386 }, // 봄인테리어 (GS수퍼마켓 인천부개점 기준)
   3: { lat: 37.5075993, lng: 126.7516984 }, // 데코크로스디자인 (대림타운, 부천 상동)
+  // 5~7은 사용자가 공유한 네이버 플레이스의 좌표를 그대로 썼다 (2026-09-22).
+  5: { lat: 37.5023866, lng: 126.7727589 }, // 모로디자인 (부천 중동)
+  6: { lat: 37.5048746, lng: 126.7367679 }, // 새롬 인테리어 (충선로 174)
+  7: { lat: 37.5100747, lng: 126.7361592 }, // 리본인테리어 (삼산동 후문상가)
 };
 
 function createPinIcon({ text, bg, size }) {
@@ -760,7 +764,7 @@ function Contractors() {
     <section>
       <h2>시공업체 후보</h2>
       <p className="muted">
-        디자인큐원과 봄인테리어는 서면 견적서를 받았고 데코크로스디자인·미송디자인·모로디자인은 아직 견적을 못 받았습니다.
+        디자인큐원과 봄인테리어는 서면 견적서를 받았고 나머지 업체(데코크로스디자인·미송디자인·모로디자인·새롬 인테리어·리본인테리어)는 아직 견적을 못 받았습니다.
         부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
         카드의 "견적서 보기"는 그 업체 견적 내역, "체크리스트 보기"는 상담·계약 체크리스트 페이지로 이동합니다.
       </p>
@@ -783,6 +787,11 @@ function Contractors() {
             {c.portfolioUrl && (
               <a className="event-detail-link" href={c.portfolioUrl} target="_blank" rel="noreferrer">
                 오늘의집 포트폴리오 보기 →
+              </a>
+            )}
+            {c.placeUrl && (
+              <a className="event-detail-link" href={c.placeUrl} target="_blank" rel="noreferrer">
+                네이버 지도에서 보기 →
               </a>
             )}
             <div className="card-actions">
