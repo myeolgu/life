@@ -138,7 +138,14 @@ function ProgressSummary({ domainStats, events }) {
           {recentDone.length === 0 && <p className="muted" style={{ margin: 0 }}>아직 완료 항목이 없습니다.</p>}
           <ul className="summary-list">
             {recentDone.map((i) => (
-              <li key={i.id}>✓ {i.label} <span className="muted">({formatShortDate(i.updatedAt.slice(0, 10))})</span></li>
+              <li key={i.id} className="summary-milestone">
+                <span className="summary-check" aria-hidden="true">✓</span>
+                {/* 날짜도 마일스톤과 같은 이유로 .muted 대신 아랫줄 메타로 둔다 (2026-09-23). */}
+                <span className="summary-milestone-body">
+                  <span>{i.label}</span>
+                  <span className="summary-meta">{formatShortDate(i.updatedAt.slice(0, 10))} 완료</span>
+                </span>
+              </li>
             ))}
           </ul>
         </div>
