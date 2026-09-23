@@ -120,10 +120,14 @@ function ProgressSummary({ domainStats, events }) {
           {upcoming.length === 0 && <p className="muted" style={{ margin: 0 }}>예정된 일정이 없습니다.</p>}
           <ul className="summary-list">
             {upcoming.map((e) => (
-              <li key={e.id}>
+              <li key={e.id} className="summary-milestone">
                 <span className="summary-dot" style={{ background: domainMeta[e.domain]?.color }} />
-                <span className="nowrap">{formatShortDate(e.start)}</span> {e.title}
-                <span className="muted"> · {domainMeta[e.domain]?.label}</span>
+                {/* 카테고리 이름은 항상 제목 아래 줄에 둔다 — 예전엔 .muted(아래 여백 16px)로 제목 옆에
+                    흘려서, 제목 길이에 따라 옆에 떠 있거나 다음 줄로 밀려 줄마다 위치가 달랐다 (2026-09-23). */}
+                <span className="summary-milestone-body">
+                  <span><span className="nowrap">{formatShortDate(e.start)}</span> {e.title}</span>
+                  <span className="summary-meta">{domainMeta[e.domain]?.label}</span>
+                </span>
               </li>
             ))}
           </ul>

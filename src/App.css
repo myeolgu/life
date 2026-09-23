@@ -94,10 +94,24 @@
   margin-bottom: 12px;
 }
 
+/* 카드가 4장이라 auto-fit으로 두면 태블릿 폭에서 3+1로 나뉘어 한 장만 아래 줄에 남았다.
+   4열 → 2열 → 1열로만 바뀌게 고정한다 (2026-09-23). */
 .progress-summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
+}
+
+@media (max-width: 1000px) {
+  .progress-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .progress-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .summary-card {
@@ -147,6 +161,27 @@
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.summary-list li.summary-milestone {
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
+/* 점을 제목 첫 줄의 가운데에 맞춘다 (0.82rem × line-height 1.5 기준). */
+.summary-milestone .summary-dot {
+  margin-top: calc(0.75em - 3.5px);
+}
+
+.summary-milestone-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.summary-meta {
+  color: var(--text-muted);
+  font-size: 0.74rem;
 }
 
 .category-grid {
@@ -1277,12 +1312,14 @@ th, td {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 24px;
+  /* 한국어 로케일은 날짜가 "23일"처럼 나와서 24px 원 안에 안 들어가고 글자가 테두리 밖으로
+     삐져나왔다 — 폭을 고정하지 않고 글자에 맞춰 늘어나는 알약 모양으로 바꿨다 (2026-09-23). */
+  min-width: 24px;
   height: 24px;
   margin: 2px;
-  padding: 0;
+  padding: 0 6px;
   border: 2px solid var(--accent);
-  border-radius: 50%;
+  border-radius: 999px;
   color: var(--accent);
   font-weight: 700;
   line-height: 1;
@@ -1297,6 +1334,12 @@ th, td {
 .calendar-wrap .fc-scrollgrid-sync-table,
 .calendar-wrap table {
   background: #ffffff;
+}
+
+/* 전역 table 규칙(margin: 12px 0 20px)이 FullCalendar 내부 표에도 먹어서, 흰 배경의 .fc 안에
+   툴바 아래·달력 아래로 빈 흰 띠가 생겼다 (2026-09-23). */
+.calendar-wrap table {
+  margin: 0;
 }
 
 .calendar-wrap .fc-scrollgrid-section-header > * {
@@ -1375,6 +1418,47 @@ th, td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 좁은 화면에서는 날짜 칸이 40px 남짓이라 상태 배지만 보이고 제목이 통째로 잘렸다. 배지를 숨기고
+   제목을 보여준다 — 상태는 칩 배경색(종료 회색/진행중 보라/예정 주황)으로 여전히 구분된다 (2026-09-23). */
+@media (max-width: 600px) {
+  .cal-event .status-badge {
+    display: none;
+  }
+
+  .cal-event {
+    padding: 2px 4px;
+    gap: 3px;
+  }
+
+  .cal-event .legend-dot {
+    flex-shrink: 0;
+  }
+}
+
+/* 좁은 화면에서 툴바를 1fr auto 1fr 한 줄로 두면 왼쪽 칸(이전/다음 + 오늘)이 모자라서 "오늘"이
+   아래로 떨어졌다. 제목을 첫 줄 전체로 올리고 버튼들을 둘째 줄 양 끝에 둔다 (2026-09-23). */
+@media (max-width: 480px) {
+  .calendar-wrap .fc-toolbar {
+    grid-template-columns: 1fr auto;
+    row-gap: 10px;
+  }
+
+  .calendar-wrap .fc-toolbar-chunk:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .calendar-wrap .fc-toolbar-chunk:first-child {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .calendar-wrap .fc-toolbar-chunk:first-child .fc-today-button {
+    margin-left: 0;
+  }
 }
 
 .cal-event.status-end { background: #f0f2f7; }
