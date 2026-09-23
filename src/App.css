@@ -984,6 +984,16 @@ th, td {
   color: #b6301f;
 }
 
+.verify-badge.excluded {
+  background: #eeeeee;
+  color: #595959;
+}
+
+/* 진행하지 않기로 한 업체 카드 — 참고용이라 한 단계 흐리게 보여준다. */
+.card.contractor-excluded {
+  opacity: 0.75;
+}
+
 .tag-badge {
   display: inline-block;
   font-size: 0.68rem;

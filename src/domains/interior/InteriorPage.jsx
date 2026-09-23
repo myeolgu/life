@@ -760,62 +760,88 @@ function Contractors() {
     return <QuotePage contractor={selected.contractor} onBack={() => setSelected(null)} />;
   }
 
+  // excluded인 업체는 진행하지 않기로 한 곳이다. 지우지 않고 견적 비교용 참고로 목록 아래에 따로 남겨둔다
+  // (2026-09-23, 봄인테리어). 업체 번호(no)는 견적서·체크리스트·지도 핀의 키라서 다시 매기지 않는다.
+  const active = contractors.filter((c) => !c.excluded);
+  const excluded = contractors.filter((c) => c.excluded);
+  const renderCard = (c) => (
+    <ContractorCard
+      key={c.no}
+      contractor={c}
+      onOpenQuote={() => setSelected({ contractor: c, mode: "quote" })}
+      onOpenChecklist={() => setSelected({ contractor: c, mode: "checklist" })}
+    />
+  );
+
   return (
     <section>
       <h2>시공업체 후보</h2>
       <p className="muted">
-        디자인큐원과 봄인테리어는 서면 견적서를 받았고 나머지 업체(데코크로스디자인·미송디자인·모로디자인·새롬 인테리어·리본인테리어)는 아직 견적을 못 받았습니다.
+        디자인큐원은 서면 견적서를 받았고 나머지 업체(데코크로스디자인·미송디자인·모로디자인·새롬 인테리어·리본인테리어)는 아직 견적을 못 받았습니다.
         부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
         카드의 "견적서 보기"는 그 업체 견적 내역, "체크리스트 보기"는 상담·계약 체크리스트 페이지로 이동합니다.
       </p>
-      <div className="card-grid">
-        {contractors.map((c) => (
-          <div className="card" key={c.no}>
-            <h3>
-              {c.no}. {c.name}{" "}
-              {c.verified ? (
-                <span className="verify-badge verified">확인됨</span>
-              ) : (
-                <span className="verify-badge unverified">확인 필요</span>
-              )}
-            </h3>
-            <p><b>위치</b> {c.address}</p>
-            <p><b>거리</b> {c.distance}</p>
-            <p><b>연락처</b> {c.contact}</p>
-            <p className="action">{c.note}</p>
-            {c.quote && <QuoteCardSummary quote={c.quote} />}
-            {c.portfolioUrl && (
-              <a className="event-detail-link" href={c.portfolioUrl} target="_blank" rel="noreferrer">
-                오늘의집 포트폴리오 보기 →
-              </a>
-            )}
-            {c.placeUrl && (
-              <a className="event-detail-link" href={c.placeUrl} target="_blank" rel="noreferrer">
-                네이버 지도에서 보기 →
-              </a>
-            )}
-            <div className="card-actions">
-              {c.quote && (
-                <button className="btn-secondary" onClick={() => setSelected({ contractor: c, mode: "quote" })}>
-                  견적서 보기
-                </button>
-              )}
-              <button className="btn-secondary" onClick={() => setSelected({ contractor: c, mode: "checklist" })}>
-                체크리스트 보기
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="card-grid">{active.map(renderCard)}</div>
 
       <h3>위치 비교 (★ 부개주공1단지)</h3>
       <p className="muted">지도 위 숫자 핀이 각 업체 위치입니다. 위 카드 번호와 동일하고, 주소가 확인된 업체만 표시됩니다.</p>
-      <ContractorsMap contractors={contractors} />
+      <ContractorsMap contractors={active} />
+
+      {excluded.length > 0 && (
+        <>
+          <h3>진행하지 않기로 한 업체 (참고용)</h3>
+          <p className="muted">후보에서 뺐지만 견적 비교에 참고하려고 남겨둔 업체입니다. 지도에는 표시하지 않습니다.</p>
+          <div className="card-grid">{excluded.map(renderCard)}</div>
+        </>
+      )}
 
       <p className="callout">
         상담 전에 계약/견적 체크리스트 탭의 "업체 말장난 TOP5"를 다시 한 번 확인할 것.
       </p>
     </section>
+  );
+}
+
+function ContractorCard({ contractor: c, onOpenQuote, onOpenChecklist }) {
+  return (
+    <div className={`card${c.excluded ? " contractor-excluded" : ""}`}>
+      <h3>
+        {c.no}. {c.name}{" "}
+        {c.excluded ? (
+          <span className="verify-badge excluded">진행 안 함</span>
+        ) : c.verified ? (
+          <span className="verify-badge verified">확인됨</span>
+        ) : (
+          <span className="verify-badge unverified">확인 필요</span>
+        )}
+      </h3>
+      {c.excluded && c.excludedNote && <p className="action">{c.excludedNote}</p>}
+      <p><b>위치</b> {c.address}</p>
+      <p><b>거리</b> {c.distance}</p>
+      <p><b>연락처</b> {c.contact}</p>
+      <p className="action">{c.note}</p>
+      {c.quote && <QuoteCardSummary quote={c.quote} />}
+      {c.portfolioUrl && (
+        <a className="event-detail-link" href={c.portfolioUrl} target="_blank" rel="noreferrer">
+          오늘의집 포트폴리오 보기 →
+        </a>
+      )}
+      {c.placeUrl && (
+        <a className="event-detail-link" href={c.placeUrl} target="_blank" rel="noreferrer">
+          네이버 지도에서 보기 →
+        </a>
+      )}
+      <div className="card-actions">
+        {c.quote && (
+          <button className="btn-secondary" onClick={onOpenQuote}>
+            견적서 보기
+          </button>
+        )}
+        <button className="btn-secondary" onClick={onOpenChecklist}>
+          체크리스트 보기
+        </button>
+      </div>
+    </div>
   );
 }
 
