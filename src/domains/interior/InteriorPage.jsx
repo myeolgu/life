@@ -435,19 +435,35 @@ function sectionAmount(section) {
   );
 }
 
+// kind: "written"(서면 견적서를 옮김) / "verbal"(구두로만 들음) / "reported"(사용자가 금액만 전해줬고
+// 서면인지는 아직 모름 — 2026-09-28, 모로·새롬 상담 결과를 받으면서 추가).
+const QUOTE_KIND_LABEL = {
+  written: "서면 견적서",
+  verbal: "구두 (서면 없음)",
+  reported: "금액만 전달받음 (서면 여부 확인 필요)",
+};
+
 function QuoteCardSummary({ quote }) {
   return (
     <div className="quote-block">
       <p className="quote-kind">
         <b>견적</b>{" "}
         <span className={`verify-badge ${quote.kind === "written" ? "verified" : "unverified"}`}>
-          {quote.kind === "written" ? "서면 견적서" : "구두 (서면 없음)"}
+          {QUOTE_KIND_LABEL[quote.kind] ?? QUOTE_KIND_LABEL.verbal}
         </span>
       </p>
       <p className="quote-total">{won(quote.total)}</p>
-      <p className="muted">부가세 {quote.vat} · 견적일 {quote.date}</p>
+      <p className="muted">
+        부가세 {quote.vat}
+        {quote.vat === "별도" && ` (포함 시 ${won(Math.round(quote.total * 1.1))})`} · 견적일 {quote.date}
+      </p>
     </div>
   );
+}
+
+// 금액만 있고 옮겨 적은 내역이 없는 견적은 상세 페이지가 거의 비어 보이므로 버튼을 숨긴다.
+function hasQuoteDetail(contractor) {
+  return Boolean(contractor.quote) && (contractor.quote.kind === "written" || (quoteSectionsSeed[contractor.no]?.length ?? 0) > 0);
 }
 
 function QuoteLineRow({ line }) {
@@ -777,7 +793,8 @@ function Contractors() {
     <section>
       <h2>시공업체 후보</h2>
       <p className="muted">
-        디자인큐원은 서면 견적서를 받았고 나머지 업체(데코크로스디자인·미송디자인·모로디자인·새롬 인테리어·리본인테리어)는 아직 견적을 못 받았습니다.
+        디자인큐원은 서면 견적서를 받았고, 모로디자인·새롬 인테리어는 9/27 상담 후 금액만 전달받았습니다(서면 여부 확인 필요). 리본인테리어는 9/30까지 견적을 주기로 했고, 데코크로스디자인·미송디자인은 아직 견적을 못 받았습니다.
+        견적 금액은 부가세 포함 여부가 업체마다 달라서, 비교할 때는 카드에 함께 적힌 "포함 시" 금액으로 맞춰 보세요.
         부개주공1단지(인천 부평구 부개동) 기준 위치/거리를 정리했습니다 — "확인 안 됨"인 항목은 상담 전 직접 재확인이 필요합니다.
         카드의 "견적서 보기"는 그 업체 견적 내역, "체크리스트 보기"는 상담·계약 체크리스트 페이지로 이동합니다.
       </p>
@@ -832,7 +849,7 @@ function ContractorCard({ contractor: c, onOpenQuote, onOpenChecklist }) {
         </a>
       )}
       <div className="card-actions">
-        {c.quote && (
+        {hasQuoteDetail(c) && (
           <button className="btn-secondary" onClick={onOpenQuote}>
             견적서 보기
           </button>
