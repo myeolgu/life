@@ -189,7 +189,7 @@ function ConstructionCalendar() {
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
-          initialDate="2026-12-12"
+          initialDate="2026-12-14"
           locale="ko"
           locales={[koLocale]}
           height="auto"
@@ -268,7 +268,7 @@ function Timeline() {
     <section>
       <h2>공사 진행 순서</h2>
       <p className="muted">
-        잔금(입주)일 2026.12.10 이후, 착공 예정일 2026.12.12 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다.
+        잔금(입주)일 2026.12.10 이후, 착공 예정일 2026.12.14 기준으로 정리했습니다. 실제 착공일이 달라지면 이 캘린더를 다시 갱신합니다.
       </p>
 
       <div className="phase-grid">
