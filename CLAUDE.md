@@ -11,11 +11,7 @@ React(Vite) + Supabase 기반의 개인용 라이프 관리 웹앱입니다. Git
 
 ## 디자인 컨셉 — 픽셀/도트 느낌
 이 사이트의 시각적 컨셉은 **"살짝 픽셀아트(도트) 느낌"**이다 (2026-09-06, 사용자가 명시적으로 확정 — "그 도트 느낌나는 컨셉의 사이트로 만들고 싶어"). 구체적으로:
-- 아이콘/그림은 이모지(🛋️🏦👉 등)를 쓰지 않는다. **인라인 SVG를 좌표 찍어서 손으로 만들지 말 것** — 2026-09-06에 그렇게 만든 아이콘이 실제로 렌더링해보니 모양이 이상하게 나온 적 있음. 대신 이 순서를 따른다:
-  1. `src/assets/pixel-icons/<이름>-source.svg`로 16x16 그리드 원본을 만든다 (`shape-rendering="crispEdges"`, `<rect>`로만 구성, 곡선/그라디언트 없음). 배경이 필요하면 도메인 색(`domainMeta` 참고, 예: 인테리어 `#b4784a`, 대출 `#5b7df0`)으로 꽉 채운 사각형을 먼저 깔고, 그 위에 크림색(`#fdf6ec`) 등으로 그림을 얹는다. 투명 배경이 필요하면(본문에 흐르는 작은 장식 아이콘 등) 배경 사각형을 생략한다.
-  2. `sharp`를 임시로 설치해서(`npm install -D sharp`, 끝나면 제거) `kernel: 'nearest'`로 PNG 래스터화 (`sharp('원본.svg').resize(128, 128, {kernel:'nearest'}).png().toFile('public/icons/pixel/<이름>.png')`). 픽셀 아트는 곡선을 매끄럽게 스케일하면 안 되므로 반드시 `nearest`를 쓴다.
-  3. **Read 도구로 결과 PNG를 실제로 열어보고 모양을 확인한 다음에** 코드에 반영한다 (확인 없이 좌표만 믿고 넘어가지 않는다).
-  4. 컴포넌트에서는 `<img src={`${import.meta.env.BASE_URL}icons/pixel/<이름>.png`} />`로 불러온다 (`base: '/life/'` 설정 때문에 경로 앞에 `import.meta.env.BASE_URL`을 꼭 붙여야 한다 — 안 붙이면 GitHub Pages 배포에서 경로가 깨진다). CSS에는 `image-rendering: pixelated`를 줘서 확대/축소 시 흐려지지 않게 한다.
+- 아이콘/그림은 이모지(🛋️🏦👉 등)를 쓰지 않는다. **인라인 SVG를 좌표 찍어서 손으로 만들지 말 것** — 2026-09-06에 그렇게 만든 아이콘이 실제로 렌더링해보니 모양이 이상하게 나온 적 있음. 아이콘(앱 아이콘/파비콘 포함)은 항상 `pixel-icon` 스킬(`.claude/skills/pixel-icon/SKILL.md`)의 절차(16x16 SVG 원본 → `sharp` `kernel: 'nearest'` PNG → Read로 결과 확인 → `import.meta.env.BASE_URL` 붙여서 `<img>`)를 따른다.
 - 앱 아이콘/파비콘(`src/assets/icon-source.svg`)도 같은 원칙(16x16 그리드 픽셀아트 집 모양)으로 만들어져 있다 — 이 파일의 저채도 팔레트(#b4784a 브라운, #fdf6ec 크림, #5b3a24 진브라운, #3fa796 민트, #e0524b 레드)를 다른 UI 요소를 새로 만들 때도 참고할 것.
 - 뱃지/카드처럼 각진 사각형 요소는 완전히 둥글리기보다 살짝만 라운드 처리해서 "블로키"한 느낌을 유지한다 (너무 둥글면 일반적인 모던 UI처럼 보여서 픽셀 컨셉이 흐려짐).
 - 2026-09-06, 사용자 확정: 도트 컨셉을 카드형 요소(`.card`, `.category-card`, `.summary-card`, `.phase-card`)의 은은한 도트 패턴 배경(`radial-gradient` 1px 점, `var(--border)` 색, 14px 간격)과 버튼/탭 hover 시 원형 halo(`box-shadow: 0 0 0 Npx var(--accent-soft)`)로 확장했다. **명시적으로 하지 않기로 한 것**: 진행률 바를 도트(●○)로 바꾸는 것(알약형 진행바가 이미 더 낫다고 판단), 탭 버튼에 하단 도트 인디케이터를 추가하는 것(현재 알약형 탭 디자인과 안 맞음), 체크박스를 원형 도트로 바꾸는 것(기본 체크박스가 이미 잘 동작함) — 전체 레이아웃/타이포그래피/기존 상호작용 요소는 건드리지 않고 "배경/테두리 텍스처"로만 국한했다.
@@ -23,14 +19,12 @@ React(Vite) + Supabase 기반의 개인용 라이프 관리 웹앱입니다. Git
 ## 데이터 저장 — Supabase
 **콘텐츠는 예외 없이 전부 Supabase DB에서 관리한다** (2026-09-06, 사용자가 명시적으로 요청 — "데이터 관련은 다 supabase에서 관리"). 체크박스뿐 아니라 매물 정보, 시공 범위 표, 캘린더 일정, 계약 체크리스트 카드, 대출 요약까지 전부 Supabase 테이블에서 읽어온다. `src/domains/<도메인>/data.js`의 값들은 이제 "정적 콘텐츠"가 아니라 **최초 1회용 시드 데이터**일 뿐이다 — 테이블에 해당 도메인/섹션 행이 하나도 없을 때만 훅이 이 시드를 Supabase에 upsert하고, 그 다음부터는 항상 DB 값을 읽는다. 새 콘텐츠를 추가할 때도 이 패턴(시드 배열 + 훅)을 그대로 따른다. 클라이언트 코드는 `src/lib/supabaseClient.js`에서 환경변수(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)로 초기화한다. 이 값들은 `.env`(gitignore 처리, 로컬 개발용)와 GitHub Actions 저장소 시크릿(배포 빌드용)에 있고 절대 코드에 하드코딩하거나 커밋하지 않는다.
 
-Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL을 기록해두고, 이 파일에 반영한다. 실행은 아래 "Supabase 스키마 변경 자동화 — Management API"로 Claude가 직접 한다 (토큰이 없을 때만 사용자에게 SQL 에디터 실행을 부탁한다).
+Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL을 기록해두고, 이 파일에 반영한다. 실행은 `supabase-sql` 스킬(`.claude/skills/supabase-sql/SKILL.md`, Management API)로 Claude가 직접 한다 (토큰이 없을 때만 사용자에게 SQL 에디터 실행을 부탁한다).
 
 ## 이 저장소의 구조
-- `src/App.jsx` — 최상위 라우터. `view` 상태(`home`/`interior`/`loan`/...)로 홈 화면과 각 도메인 페이지를 전환한다. 새 도메인을 추가하면 여기에 분기를 추가.
-- `src/Home.jsx` — 홈 화면. 카테고리 카드(인테리어, 대출...)를 눌러 도메인으로 진입하고, 하단에 `HomeCalendar`로 전체 도메인 일정을 모아 보여준다.
 - `src/allEvents.js` — 각 도메인의 `events` 배열을 모아 홈 캘린더에서 쓰는 통합 목록. 새 도메인에 날짜 있는 일정이 생기면 여기 `domainMeta`에 색상/이름을 등록하고 `allEvents`에 합쳐준다.
-- `src/components/` — 도메인에 종속되지 않는 공용 컴포넌트. `EventStatusBadge`(종료/진행중/예정 배지, 오늘 날짜 기준 자동 계산), `HomeCalendar`(홈 화면 통합 캘린더 — 이벤트 색은 도메인이 아니라 **상태(종료/진행중/예정) 기준**이고, 도메인 구분은 작은 점만 씀), `AddEventForm`(캘린더 "+ 일정 추가" 버튼으로 여는 일정 추가 폼), `Modal`(팝업 — 캘린더 일정 상세/추가 폼 등에 사용), `Accordion`(체크리스트 등 접었다 펼 수 있는 섹션), `ErrorBoundary`(탭/섹션 단위 에러 격리 — 하나가 깨져도 앱 전체가 하얗게 안 되게 함. 새 탭/섹션을 추가할 때는 항상 이걸로 감싼다).
-- `src/assets/pixel-icons/` — 픽셀 아이콘 SVG 원본 모음 (`house-source.svg`는 없고 `src/assets/icon-source.svg`를 재사용함, `heart-source.svg`, `arrow-source.svg`, `coin-source.svg`). `public/icons/pixel/`의 PNG들은 전부 여기서 래스터화한 결과물 — 새 아이콘 만드는 절차는 위 "디자인 컨셉" 참고.
+- `src/components/` — 도메인에 종속되지 않는 공용 컴포넌트. 새 탭/섹션을 추가할 때는 항상 `ErrorBoundary`로 감싼다 (하나가 깨져도 앱 전체가 하얗게 안 되게).
+- `src/assets/pixel-icons/` — 픽셀 아이콘 SVG 원본 모음. `public/icons/pixel/`의 PNG들은 전부 여기서 래스터화한 결과물 (`pixel-icon` 스킬 참고).
 - `src/domains/<도메인>/` — 도메인별 폴더. 각 도메인은 `data.js`(콘텐츠/체크리스트 시드 데이터)와 `<Domain>Page.jsx`(그 도메인 안의 탭/섹션 UI)로 구성된다.
   - `src/domains/interior/` — 인테리어 도메인. 탭: 시공업체(`react-leaflet` 지도 + 업체 카드, 카드에서 업체별 계약 검토 체크리스트와 견적서 상세 페이지로 진입 — 견적서는 `content_items`의 `section='quote:<업체 no>'`) / 요구사항(공간별 요구사항을 견적서와 대조한 결과) / 진행 상황 / 매물 정보 / 시공 범위 / 공사 진행 순서(캘린더 + 단계 카드) / 계약·견적 체크리스트
   - `src/domains/loan/` — 대출/혼인신고 도메인. 탭: 진행 상황(캘린더 + 체크리스트) / 자금 계획(일정, 대출 요약, 은행 안내 기준 필요서류 체크리스트와 발급 가이드) / 후기 & 꿀팁(출처 링크 카드)
@@ -40,12 +34,8 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
   - `useChecklist.js` — 체크박스 목록 (`checklist_items` 테이블). 도메인마다 다른 `domain` 문자열 키로 구분: `interior_progress`, `loan_progress`, `loan_documents` 등.
   - `useContentItems(domain, section, seedItems)` — 체크박스가 아닌 표/카드/텍스트 목록 (`content_items` 테이블). 각 항목을 JSONB로 그대로 저장해서 형태가 자유롭다 (매물 정보 한 덩어리, 시공 범위 표 행, 카드 목록 등 전부 이걸로 관리). `updateItem(index, patch)`로 항목 하나의 필드를 부분 수정할 수 있다 (예: 예산 도메인의 금액 수정 — id는 `${domain}:${section}:${index}` 규칙을 그대로 따르므로 seed 배열의 순서/개수를 바꾸면 index가 어긋난다는 점에 유의).
   - `useCalendarEvents(domain, seedEvents)` — 날짜 있는 일정 (`calendar_events` 테이블). FullCalendar 이벤트 형식(`id/title/start/end/description`)을 그대로 주고받는다.
-- `src/lib/supabaseClient.js` — Supabase 클라이언트 초기화.
-- `index.html` — `<meta name="robots" content="noindex, nofollow">`로 검색엔진 노출 차단, Pretendard 폰트 CDN 로드.
-- `public/robots.txt` — 전체 크롤링 차단 (`Disallow: /`).
-- `.github/workflows/deploy.yml` — main 브랜치 push 시 GitHub Pages 자동 배포 (Supabase 환경변수를 빌드 시 주입).
 - `vite.config.js` — `base: '/life/'` (GitHub Pages 저장소 경로와 일치, 저장소명이 바뀌면 같이 수정) + `VitePWA` 플러그인 설정(매니페스트, 아이콘, 서비스워커).
-- `src/assets/icon-source.svg` — 앱 아이콘 원본 (16x16 그리드 픽셀아트 집 모양, `shape-rendering="crispEdges"`). `public/favicon.svg`와 `public/icons/`의 PNG(192/512/마스커블 512)는 전부 이 파일에서 만든 결과물이라, 아이콘을 바꾸려면 이 SVG를 고치고 다시 렌더링해야 한다 (PNG는 `sharp`로 `kernel: 'nearest'` 리사이즈해야 픽셀 경계가 흐려지지 않는다 — 작업 끝나면 `sharp`는 다시 제거). 디자인 컨셉은 위 "디자인 컨셉 — 픽셀/도트 느낌" 참고.
+- `src/assets/icon-source.svg` — 앱 아이콘 원본. `public/favicon.svg`와 `public/icons/`의 PNG는 전부 이 파일에서 만든 결과물이라, 아이콘을 바꾸려면 이 SVG를 고치고 다시 렌더링해야 한다 (`pixel-icon` 스킬 참고).
 - `.claude/agents/` — 도메인별 서브에이전트 (2026-09-16, 예산·대출 도메인이 구체화되면서 인테리어 전용 하나뿐이던 걸 확장함). 새 도메인이 추가되면 같은 방식으로 도메인별 에이전트를 늘린다.
   - `interior-design-assistant.md` — 인테리어(공간구성/자재/시공/견적) 전담.
   - `loan-assistant.md` — 대출(디딤돌대출)/혼인신고 전담.
@@ -53,84 +43,31 @@ Supabase 테이블 스키마나 RLS 정책을 바꿀 때는 실제 실행한 SQL
   - `fact-checker.md` — 도메인에 종속되지 않는 검증 전담. 업체 정보·정책·수치 등 데이터에 적힌 사실 주장을 외부 출처와 대조해서 "확인됨/확인 안 됨/판단 보류"를 근거와 함께 판정한다 (도메인 에이전트가 새 정보를 채워 넣는 역할이라면, 이건 그 정보를 의심하고 대조하는 역할 — 그래서 도메인별로 만들지 않고 하나로 공용).
 
 ## Supabase 테이블: checklist_items
-체크박스 계열 데이터는 전부 이 하나의 테이블에서 `domain` 컬럼으로 구분해서 관리한다 (도메인별로 테이블을 새로 만들지 않는다).
+체크박스 계열 데이터는 전부 이 하나의 테이블에서 `domain` 컬럼으로 구분해서 관리한다 (도메인별로 테이블을 새로 만들지 않는다). 전체 `create table`/RLS SQL은 `supabase-sql` 스킬에 있다.
 
-```sql
-create table checklist_items (
-  id text primary key,
-  domain text not null,
-  label text not null,
-  done boolean not null default false,
-  group_label text,
-  sort_order int not null default 0,
-  updated_at timestamptz not null default now()
-);
-
-alter table checklist_items enable row level security;
-
-create policy "anon read" on checklist_items for select to anon, authenticated using (true);
-create policy "anon write" on checklist_items for insert to anon, authenticated with check (true);
-create policy "anon update" on checklist_items for update to anon, authenticated using (true) with check (true);
-create policy "anon delete" on checklist_items for delete to anon, authenticated using (true);
-```
-`to anon, authenticated`를 꼭 명시할 것 — 역할을 안 적으면(기본 PUBLIC) 실제로는 insert가 RLS에 막히는 걸 2026-09-06에 겪었다. 사용자가 로그인 없이 anon key로만 접근하는 개인용 사이트라서 RLS를 전체 허용으로 열어둔 것 — 인증을 붙이기 전까지는 유지한다. 앱이 처음 로드될 때 `useChecklist`가 각 도메인의 시드 데이터를 자동으로 upsert하므로, 테이블만 만들어두면 항목은 앱이 채운다.
+RLS 정책은 `to anon, authenticated`를 꼭 명시할 것 — 역할을 안 적으면(기본 PUBLIC) 실제로는 insert가 RLS에 막히는 걸 2026-09-06에 겪었다. 사용자가 로그인 없이 anon key로만 접근하는 개인용 사이트라서 RLS를 전체 허용으로 열어둔 것 — 인증을 붙이기 전까지는 유지한다. 앱이 처음 로드될 때 `useChecklist`가 각 도메인의 시드 데이터를 자동으로 upsert하므로, 테이블만 만들어두면 항목은 앱이 채운다.
 
 `group_label`은 선택 필드다 — 체크리스트 항목을 화면에서 소그룹으로 묶어 보여줘야 할 때 쓴다 (예: 디딤돌대출 필요서류를 "공통"/"남편"/"아내"로 나눠서 보여줌, `LoanPage.jsx`의 `groupItems` 참고). 그룹이 필요 없는 체크리스트는 그냥 `null`로 둔다.
 
 ## Supabase 테이블: content_items, calendar_events
-체크박스가 아닌 나머지 콘텐츠(매물정보/시공범위/계약체크리스트/자금계획 요약 등)와 캘린더 일정도 각각 이 두 테이블에서 관리한다. 둘 다 `checklist_items`와 같은 RLS 정책 구조(`to anon, authenticated`로 select/insert/update/delete 전체 허용)를 쓴다.
-
-```sql
-create table content_items (
-  id text primary key,
-  domain text not null,
-  section text not null,
-  data jsonb not null,
-  sort_order int not null default 0,
-  updated_at timestamptz not null default now()
-);
-
-create table calendar_events (
-  id text primary key,
-  domain text not null,
-  title text not null,
-  start_date date not null,
-  end_date date,
-  description text,
-  sort_order int not null default 0,
-  updated_at timestamptz not null default now()
-);
-```
+체크박스가 아닌 나머지 콘텐츠(매물정보/시공범위/계약체크리스트/자금계획 요약 등)와 캘린더 일정도 각각 이 두 테이블에서 관리한다. 둘 다 `checklist_items`와 같은 RLS 정책 구조(`to anon, authenticated`로 select/insert/update/delete 전체 허용)를 쓴다 (스키마 SQL은 `supabase-sql` 스킬).
 - `content_items.data`는 JSONB라 형태가 자유롭다: `section='property'`면 매물 정보 객체 하나를 통째로, `section='scope'`면 시공 범위 표의 각 행을 하나씩, `section='contract_checklist'`면 카드 하나씩 저장한다. `(domain, section)` 조합으로 어떤 화면의 어떤 콘텐츠인지 구분한다.
 - `calendar_events`는 FullCalendar 이벤트 형식 그대로 컬럼화했다 (`start_date`/`end_date`가 FullCalendar의 `start`/`end`에 대응, `end_date`는 "포함하지 않는" 다음 날짜).
 
 ## 일정/캘린더 데이터
 날짜가 있는 진행 일정(공사 순서 등)은 표가 아니라 `@fullcalendar/react`(dayGrid + interaction 플러그인)로 실제 달력 뷰로 보여준다. 날짜를 클릭하면 상세 설명이 모달 팝업으로 나온다 (`src/components/Modal.jsx`, `InteriorPage.jsx`의 `Timeline` 컴포넌트 참고).
 
-이벤트 시드 데이터 형식 (`src/domains/<도메인>/data.js`의 `events` 배열 — `useCalendarEvents`의 초기값으로만 쓰임):
-```js
-{ id: "d1", title: "철거", start: "2026-12-12", end: "2026-12-15", description: "욕실 철거, 폐기물 반출 등 상세 내용" }
-```
+이벤트 시드 데이터(`src/domains/<도메인>/data.js`의 `events` 배열 — `useCalendarEvents`의 초기값으로만 쓰임) 규칙:
 - `end`는 FullCalendar 규칙대로 "포함하지 않는" 다음 날짜다. 하루짜리 일정이면 `end`를 아예 생략한다.
 - `title`은 달력 칸에 들어갈 짧은 이름, `description`은 클릭했을 때 보여줄 전체 설명.
 - 홈 화면 통합 캘린더(`src/allEvents.js`의 `useAllEvents`)는 각 도메인의 `useCalendarEvents` 결과를 합쳐서 보여준다 — 새 도메인에 일정이 생기면 여기에도 추가한다. **일정 색상은 도메인이 아니라 상태(`getEventStatus`) 기준**으로 칠한다 — 도메인은 작은 점(`legend-dot`)으로만 구분한다 (한 달에 한 도메인 일정만 있으면 전부 같은 색으로 보여서 헷갈린다는 피드백을 받아 2026-09-06에 고침). `useAllEvents`가 돌려주는 `addEvent(domain, event)`로 캘린더 헤더의 "+ 일정 추가" 커스텀 버튼(`customButtons`, `AddEventForm` 모달)에서 새 일정을 바로 추가할 수 있다 — 폼의 "종료일"은 사용자에게는 포함(inclusive)으로 보여주고, 저장 직전에 FullCalendar 규칙(미포함 다음날)으로 변환한다(`toExclusiveEnd`).
 - **FullCalendar 패키지는 버전을 반드시 통일할 것.** `@fullcalendar/react`만 v7로 먼저 올라가고 `core`/`daygrid`/`interaction`은 아직 v6가 `latest`인 시기가 있어서(2026-09-06 기준), `npm install @fullcalendar/react @fullcalendar/core ...`를 버전 지정 없이 실행하면 서로 다른 메이저 버전이 섞여 설치되어 캘린더가 마운트 중 조용히 깨지고(에러 로그도 없이) 해당 탭이 빈 화면으로 보인다. `package.json`에 네 패키지 모두 정확히 같은 버전(현재 `6.1.21`)으로 고정되어 있다 — 업그레이드할 땐 네 패키지를 항상 같이, 같은 버전으로 올린다.
 - 일정 상태(종료/진행중/예정) 배지는 `src/components/EventStatusBadge.jsx`의 공용 컴포넌트로 관리한다. 오늘 날짜와 이벤트의 start/end를 비교해 상태를 자동 계산하므로(`getEventStatus`), 도메인 쪽에서 상태를 직접 하드코딩하지 않는다. 색상/라벨 체계는 Figma "삼성물산 시니어 리빙 솔루션 리빙매니저" 캘린더 컴포넌트(BadgeCalendar24)를 참고함 — 종료 #888, 진행중 #7b53ea, 예정 #ff863b.
 
-## Supabase 스키마 변경 자동화 — Management API
-스키마(테이블/정책 등)를 바꿔야 할 때, 매번 사용자에게 SQL Editor에서 직접 실행해달라고 부탁할 필요 없다. `.env`(gitignore 처리, 커밋 안 됨)에 `SUPABASE_PROJECT_REF`와 `SUPABASE_MANAGEMENT_TOKEN`이 들어있으면, 아래처럼 Management API로 Claude가 직접 SQL을 실행할 수 있다:
-
-```bash
-curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
-  -H "Authorization: Bearer $SUPABASE_MANAGEMENT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"query":"<실행할 SQL>"}'
-```
+## Supabase SQL 실행 — Management API
+SQL(스키마 변경, DB 행 동기화)은 `supabase-sql` 스킬(`.claude/skills/supabase-sql/SKILL.md`)의 절차로 Claude가 직접 실행한다 (`.env`의 `SUPABASE_PROJECT_REF`/`SUPABASE_MANAGEMENT_TOKEN` 사용, 한글 SQL은 UTF-8 JSON 파일로 전송).
 
 - `SUPABASE_MANAGEMENT_TOKEN`은 프로젝트를 통째로 제어하는 강력한 토큰이다. **VITE_ 접두사를 붙이지 말 것** — 붙이면 Vite가 클라이언트 번들에 그대로 노출시켜버린다. 절대 앱 코드/커밋에 넣지 않는다.
-- `.env`가 없거나 이 값들이 비어있으면, 사용자에게 https://supabase.com/dashboard/account/tokens 에서 토큰 발급을 요청한다 (Access Tokens → Generate new token, 생성 직후 한 번만 전체 값이 보이므로 그 자리에서 바로 복사해야 함).
-- DB 비밀번호(사용자가 프로젝트 생성 시 설정한 것)로 직접 Postgres 접속(`db.<ref>.supabase.co:5432`)은 이 환경에서 DNS 자체가 안 잡혀서 실패했다 (IPv6 전용으로 추정) — Management API 방식이 더 안정적이니 이걸 기본으로 쓴다.
-- **한글이 포함된 SQL을 curl로 보낼 때는 `-d '{"query":"..."}'`처럼 커맨드라인에 직접 넣지 말 것.** 쉘 따옴표 처리 과정에서 인코딩이 깨져 한글이 mojibake로 저장된다 (2026-09-06에 겪음). 대신 UTF-8로 JSON 파일을 써서 `--data-binary "@파일경로"`로 보낸다.
 - **시드를 고쳐도 DB의 기존 행은 자동으로 갱신되지 않는다 — 세 테이블 모두 해당.** 훅(`useChecklist`/`useContentItems`/`useCalendarEvents`)은 해당 도메인/섹션 행이 하나도 없을 때만 시드를 넣으므로, 이미 방문된 적이 있으면 `data.js` 수정만으로는 화면이 바뀌지 않는다. `data.js`를 고칠 때마다 Management API로 DB도 같이 맞춘다:
   - 기존 항목 수정 → 해당 `id` 행을 `update` (`content_items`는 `data` JSONB 전체를 시드 값으로 교체).
   - 항목 추가 → 새 행을 `insert`. `content_items`의 id는 `${domain}:${section}:${index}`이므로 **배열 끝에 추가**하고 그 index로 id를 만든다. 중간에 끼워 넣거나 순서를 바꾸면 기존 행의 index와 어긋나서 다른 항목을 덮어쓰게 된다.
