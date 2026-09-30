@@ -333,4 +333,12 @@ export const tips = [
     source: "내집마련 디딤돌 대출 업무처리기준 (한국주택금융공사, 2026-06-18 개정판) 제5장 1.~2.",
     url: "https://www.hf.go.kr/cms/etcResourceDown.do?site=%24cms%24NYeyA&key=%24cms%24M4VwRgDAjA+qmwgJhtGSBsENKQOgAcATAMyA",
   },
+  {
+    type: "정보",
+    title: "공식 확인 — 서류 유효기간 1개월은 '발급일 ~ 대출접수일' 기준",
+    summary:
+      "「내집마련 디딤돌 대출 업무처리기준」(2026-06-18 개정판) 제2장 3. 심사 시에 제출받을 서류 표 하단 원문: '유효기간은 서류발급일로부터 대출접수일까지로 초일불산입하여 계산'. 즉 1개월 유효기간은 승인일이나 실행일이 아니라 기금e든든 접수일 기준으로 본다 — 10/1 발급·10/1 접수면 승인이 11월에 나도 서류는 유효하다. 표상 소득증명·재직확인·주택관련(매매계약서 등) 서류의 유효기간은 1개월이며, 가족관계증명원·소득증명서류 등은 사본 징구도 가능. 단 은행이 내부 방침으로 실행 전 재발급을 요청할 수는 있음.",
+    source: "내집마련 디딤돌 대출 업무처리기준 (한국주택금융공사, 2026-06-18 개정판) 제2장 3.",
+    url: "https://www.hf.go.kr/cms/etcResourceDown.do?site=%24cms%24NYeyA&key=%24cms%24M4VwRgDAjA+qmwgJhtGSBsENKQOgAcATAMyA",
+  },
 ];
