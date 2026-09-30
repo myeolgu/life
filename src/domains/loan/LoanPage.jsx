@@ -159,7 +159,7 @@ function Finance() {
         필요 서류 체크리스트
         {!persistent && <span className="muted"> (Supabase 미설정: 저장 안 됨)</span>}
       </h3>
-      <p className="muted">매매계약서 사본은 부부 공동 1부만 있으면 되어 "공통"으로 뺐고, 나머지는 각자 1부씩 준비합니다. 괄호 안은 발급 유효기간/권장 발급 시점입니다.</p>
+      <p className="muted">은행 안내문에서 ✓ 표시된 서류 + 하단 손글씨 추가분만 제출합니다. 매매계약서·신고필증·전입세대 열람내역(물건지 기준)은 1부씩 "공통", 나머지는 부부 각자 1부씩 준비하고, 계약서를 뺀 모든 서류는 발급 1개월 이내여야 합니다.</p>
       {groupItems(items).map(({ key, items: groupList }) => {
         const doneCount = groupList.filter((d) => d.done).length;
         return (
