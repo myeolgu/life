@@ -52,6 +52,9 @@ export const finance = {
   // 신고필증)만 내면 된다고 함 → 체크 안 된 임대차계약서·보증금 5% 영수증·급여입금내역서와
   // 중소기업취업청년·개인사업자 추가서류는 전부 뺐다. 전입세대열람내역은 물건지 주소 기준 서류이고
   // 안내문의 "(본인&배우자)" 표시도 등본·초본에만 걸려 있어서 부부 각각이 아니라 공통 1건으로 합침.
+  // 2026-09-30: 갑근세 영수증 줄의 손글씨는 "(배우자)"뿐이고, 사용자 기억으로도 아내가 8/31에 이직했다고
+  // 하자 담당자가 이 줄을 추가로 체크한 것 → 남편 항목은 뺐다. 아내의 원천징수영수증 2개년치는 전 직장분
+  // (2024·2025)이라 새 회사 직인본이 불가 — 홈택스 출력본/소득금액증명원 인정 여부는 은행 확인 필요.
   documents: [
     { id: "loan:doc-sale-contract", label: "매매계약서", group: "공통" },
     { id: "loan:doc-realty-report-cert", label: "부동산 거래계약 신고필증", group: "공통" },
@@ -62,7 +65,6 @@ export const finance = {
     { id: "loan:doc-marriage-cert-husband", label: "혼인관계증명서", group: "남편" },
     { id: "loan:doc-employment-cert-husband", label: "재직증명서 (회사 직인 필수)", group: "남편" },
     { id: "loan:doc-tax-withholding-husband", label: "원천징수영수증 (회사 직인 필수, 2개년치)", group: "남편" },
-    { id: "loan:doc-simplified-tax-husband", label: "갑종근로소득원천징수영수증 (회사 직인 필수, 입사~현재까지)", group: "남편" },
     { id: "loan:doc-4insurance-husband", label: "4대보험 가입확인서", group: "남편" },
     { id: "loan:doc-health-status-husband", label: "건강보험 자격득실 확인서 (전체이력)", group: "남편" },
     { id: "loan:doc-health-payment-husband", label: "건강보험 납부내역서 (최근 12개월)", group: "남편" },
@@ -71,8 +73,8 @@ export const finance = {
     { id: "loan:doc-family-cert-wife", label: "가족관계증명서", group: "아내" },
     { id: "loan:doc-marriage-cert-wife", label: "혼인관계증명서", group: "아내" },
     { id: "loan:doc-employment-cert-wife", label: "재직증명서 (회사 직인 필수)", group: "아내" },
-    { id: "loan:doc-tax-withholding-wife", label: "원천징수영수증 (회사 직인 필수, 2개년치)", group: "아내" },
-    { id: "loan:doc-simplified-tax-wife", label: "갑종근로소득원천징수영수증 (회사 직인 필수, 입사~현재까지)", group: "아내" },
+    { id: "loan:doc-tax-withholding-wife", label: "원천징수영수증 (2개년치 — 전 직장 2024·2025년분, 홈택스 출력본 인정 여부 은행 확인)", group: "아내" },
+    { id: "loan:doc-simplified-tax-wife", label: "갑종근로소득원천징수영수증 (현 직장 직인 필수, 입사일 8/31~현재 — 이직해서 추가된 서류)", group: "아내" },
     { id: "loan:doc-4insurance-wife", label: "4대보험 가입확인서", group: "아내" },
     { id: "loan:doc-health-status-wife", label: "건강보험 자격득실 확인서 (전체이력)", group: "아내" },
     { id: "loan:doc-health-payment-wife", label: "건강보험 납부내역서 (최근 12개월)", group: "아내" },
@@ -129,7 +131,7 @@ export const finance = {
     {
       doc: "갑종근로소득원천징수영수증",
       office: "재직회사 (직인 필수, 입사~현재까지)",
-      validity: "발급 1개월 이내 — 본인·배우자 각각",
+      validity: "발급 1개월 이내 — 배우자만 (8/31 이직, 안내문 손글씨 \"(배우자)\")",
       source: "우리은행 신림역금융센터 대출 준비서류 안내문 (2026-09-18 상담 시 수령)",
     },
     {
